@@ -216,28 +216,38 @@ struct ShimMenuView: View {
                 ProgressView()
                     .controlSize(.small)
             } else {
-                Button(action: {
-                    Task {
-                        do {
-                            if manager.isCodexPatched {
-                                try await manager.restoreApp()
-                            } else {
-                                try await manager.patchApp()
-                            }
-                        } catch {}
-                    }
-                }) {
-                    Text(manager.isCodexPatched ? "Patched" : "Unpatched")
+                if manager.isCodexPatched {
+                    // Display-only badge when patched
+                    Text("Patched")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(manager.isCodexPatched ? .white : Color(NSColor.labelColor))
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
                         .background(
                             Capsule()
-                                .fill(manager.isCodexPatched ? Color.green : Color.secondary.opacity(0.15))
+                                .fill(Color.green)
                         )
+                } else {
+                    // Clickable button to trigger patching when unpatched
+                    Button(action: {
+                        Task {
+                            do {
+                                try await manager.patchApp()
+                            } catch {}
+                        }
+                    }) {
+                        Text("Unpatched")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Color(NSColor.labelColor))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(Color.secondary.opacity(0.15))
+                            )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 12)
