@@ -345,8 +345,7 @@ struct ProviderSetupWizard: View {
             ScrollView {
                 VStack(spacing: 0) {
                     if let provider = selectedProvider {
-                        let availableModels = provider.models.isEmpty ? discoveredCatalogModels : provider.models
-                        
+                        let availableModels = (provider.id == "omlx" && !discoveredModelIds.isEmpty) ? discoveredCatalogModels : (provider.models.isEmpty ? discoveredCatalogModels : provider.models)
                         if availableModels.isEmpty {
                             Text("No models discovered. Complete setup to add models manually.")
                                 .font(.caption)
@@ -560,7 +559,12 @@ struct ProviderSetupWizard: View {
                     
                     try await manager.addProvider(provider: customDef, selectedModels: customModels, apiKey: apiKey)
                 } else {
-                    let availableModels = provider.models.isEmpty ? discoveredCatalogModels : provider.models
+                    let availableModels: [ProviderModelDef]
+                    if provider.id == "omlx" && !discoveredModelIds.isEmpty {
+                        availableModels = discoveredCatalogModels
+                    } else {
+                        availableModels = provider.models.isEmpty ? discoveredCatalogModels : provider.models
+                    }
                     let selectedModels = availableModels.filter { checkedModelIds.contains($0.modelId) }
                     
                     try await manager.addProvider(provider: provider, selectedModels: selectedModels, apiKey: apiKey)
