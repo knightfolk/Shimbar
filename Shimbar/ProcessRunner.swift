@@ -137,6 +137,52 @@ actor ProcessRunner {
         return try await run(shimPath, arguments: args)
     }
 
+    // MARK: - Run Elevated
+
+    /// Runs a command with elevated administrator privileges using AppleScript's `do shell script`.
+    ///
+    /// This will trigger the standard macOS Touch ID / Password authentication dialog.
+    static func runElevated(_ command: String, arguments: [String] = []) async throws -> ProcessResult {
+        let escapedArgs = arguments.map { arg in
+            let escaped = arg.replacingOccurrences(of: "'", with: "'\\''")
+            return "'\(escaped)'"
+        }.joined(separator: " ")
+        
+        let fullCmd = "\(command) \(escapedArgs)"
+        
+        // Escape the command for AppleScript string
+        let appleScriptCmd = "do shell script \"\(fullCmd.replacingOccurrences(of: "\"", with: "\\\""))\" with administrator privileges"
+        
+        let process = Process()
+        let stdoutPipe = Pipe()
+        let stderrPipe = Pipe()
+        
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = ["-e", appleScriptCmd]
+        process.standardOutput = stdoutPipe
+        process.standardError = stderrPipe
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            process.terminationHandler = { _ in
+                let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+                let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+                
+                let result = ProcessResult(
+                    exitCode: process.terminationStatus,
+                    stdout: String(data: stdoutData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
+                    stderr: String(data: stderrData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                )
+                continuation.resume(returning: result)
+            }
+            
+            do {
+                try process.run()
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+
     // MARK: - Which
 
     /// Locates the full path to an executable by searching `PATH`.
