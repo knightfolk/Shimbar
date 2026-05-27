@@ -205,38 +205,64 @@ struct ShimMenuView: View {
     // MARK: - Current Config
 
     private var configSection: some View {
-        HStack(spacing: 6) {
-            Label("Codex status:", systemImage: "app.badge.checkmark")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.secondary)
-            
-            Text(manager.isCodexPatched ? "patched" : "unpatched")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(manager.isCodexPatched ? Color.green : Color.red)
-            
-            Spacer()
-            
-            if manager.isLoading {
-                ProgressView()
-                    .controlSize(.small)
-            } else {
-                Toggle("", isOn: Binding(
-                    get: { manager.isCodexPatched },
-                    set: { newValue in
-                        Task {
-                            do {
-                                if newValue {
-                                    try await manager.patchApp()
-                                } else {
-                                    try await manager.restoreApp()
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Label("Codex status:", systemImage: "app.badge.checkmark")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.secondary)
+                
+                Text(manager.isCodexPatched ? "patched" : "unpatched")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(manager.isCodexPatched ? Color.green : Color.red)
+                
+                Spacer()
+                
+                if manager.isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Toggle("", isOn: Binding(
+                        get: { manager.isCodexPatched },
+                        set: { newValue in
+                            Task {
+                                do {
+                                    if newValue {
+                                        try await manager.patchApp()
+                                    } else {
+                                        try await manager.restoreApp()
+                                    }
+                                } catch {
+                                    await manager.checkCodexPatchedStatus()
                                 }
-                            } catch {}
+                            }
                         }
+                    ))
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
+                    .labelsHidden()
+                }
+            }
+            
+            // Show patch/unpatch errors right underneath if they happen
+            if let err = manager.lastError, (err.contains("Patch") || err.contains("Restore") || err.contains("asar") || err.contains("permission") || err.contains("effect")) {
+                HStack(alignment: .top, spacing: 4) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.red)
+                    Text(err)
+                        .font(.system(size: 9))
+                        .foregroundStyle(.red)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Button(action: { manager.lastError = nil }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 8))
+                            .foregroundStyle(.secondary)
                     }
-                ))
-                .toggleStyle(.switch)
-                .controlSize(.small)
-                .labelsHidden()
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 2)
             }
         }
         .padding(.horizontal, 12)

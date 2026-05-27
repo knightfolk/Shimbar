@@ -83,7 +83,7 @@ actor ProcessRunner {
             .joined(separator: " ")
 
         process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-c", fullCommand]
+        process.arguments = ["-l", "-c", fullCommand]
         process.standardOutput = stdoutPipe
         process.standardError = stderrPipe
 
