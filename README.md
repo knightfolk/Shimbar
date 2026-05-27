@@ -1,6 +1,6 @@
 # 💎 Shimbar
 
-A premium, native macOS menu bar companion for the `codex-shim` local proxy daemon. **Shimbar** provides a gorgeous, visual interface directly in your Apple menu bar to control the local proxy server, add model providers, switch active coding models in real-time, and patch Codex Desktop with one click.
+A native macOS menu bar utility for the `codex-shim` local proxy daemon. **Shimbar** provides a clean, visual interface directly in your Apple menu bar to control the local proxy server, configure model providers, switch active coding models in real-time, and patch Codex Desktop.
 
 [![Download Shimbar](https://img.shields.io/badge/Download-Latest_Release-indigo.svg?style=for-the-badge&logo=apple)](https://github.com/knightfolk/Shimbar/releases)
 
@@ -20,7 +20,7 @@ A premium, native macOS menu bar companion for the `codex-shim` local proxy daem
 
 ## ✨ Features
 
-- **Gorgeous, Apple-compliant UI**: Seamless integration into the macOS menu bar with automatic light/dark mode support and native SF Symbols.
+- **Native macOS User Interface**: Clean integration into the macOS menu bar with automatic light/dark mode support and native SF Symbols.
 - **Onboard Provider Wizard**: Visual setup grid supporting **12 built-in providers**:
   - *OpenAI*, *Anthropic*, *DeepSeek*, *Google Gemini*, *Z.AI (Zhipu)*, *MiniMax*, *Qwen (Alibaba)*, *Moonshot (Kimi)*, *OpenRouter*, *Together AI*, *Fireworks AI*, and *Custom Endpoints*.
 - **Live API Key Validation**: Dynamic testing of your keys with automatic extraction and onboarding of available model IDs from upstream endpoints.
