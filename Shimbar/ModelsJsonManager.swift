@@ -144,25 +144,45 @@ class ModelsJsonManager {
         try save()
     }
     
-    /// Removes all models associated with a provider ID (by matching base URL).
+    /// Removes all models associated with a provider ID (by matching base URL, slug prefix, or normalized base URL).
     func removeProvider(_ providerId: String) throws {
         try load()
         
-        if let provider = ProviderCatalog.provider(forId: providerId) {
-            models.removeAll { $0.baseUrl == provider.defaultBaseURL }
-            try? KeychainManager.deleteKey(forProvider: providerId)
-        } else {
-            // Check if providerId is a base URL (as it is for custom providers)
-            let normalizedId = providerId.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-            let matchesBaseUrl = models.contains { $0.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/")) == normalizedId }
+        let normalizedProviderId = providerId.trimmingCharacters(in: CharacterSet(charactersIn: "/")).lowercased()
+        
+        // Remove from Keychain
+        try? KeychainManager.deleteKey(forProvider: providerId)
+        
+        // Let's filter models array
+        models.removeAll { model in
+            let modelBaseUrlNormalized = model.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/")).lowercased()
             
-            if matchesBaseUrl {
-                models.removeAll { $0.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/")) == normalizedId }
-                try? KeychainManager.deleteKey(forProvider: providerId)
-            } else {
-                // Fallback: match by slug prefix
-                models.removeAll { $0.slug.hasPrefix("\(providerId)-") }
+            // 1. If it's a known provider ID, we match by:
+            if let provider = ProviderCatalog.provider(forId: providerId) {
+                let providerBaseUrlNormalized = provider.defaultBaseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/")).lowercased()
+                
+                // - exact or normalized defaultBaseURL match
+                if modelBaseUrlNormalized == providerBaseUrlNormalized || model.baseUrl == provider.defaultBaseURL {
+                    return true
+                }
+                
+                // - slug prefix match (e.g., "zhipu-")
+                if model.slug.lowercased().hasPrefix("\(providerId.lowercased())-") {
+                    return true
+                }
             }
+            
+            // 2. If it's a custom provider / URL-based match:
+            if modelBaseUrlNormalized == normalizedProviderId || model.baseUrl == providerId {
+                return true
+            }
+            
+            // 3. Fallback slug prefix match
+            if model.slug.lowercased().hasPrefix("\(providerId.lowercased())-") {
+                return true
+            }
+            
+            return false
         }
         
         try save()
