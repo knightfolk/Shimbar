@@ -37,7 +37,7 @@ final class StartupValidator {
         let title: String
         let description: String
         var status: CheckStatus
-        let isCritical: Bool
+        var isCritical: Bool
     }
     
     /// List of check items being displayed in the onboarding checklist
@@ -198,13 +198,67 @@ final class StartupValidator {
             return
         }
         
-        let appAsarPath = "/Applications/Codex.app/Contents/Resources/app.asar"
-        let isWritable = FileManager.default.isWritableFile(atPath: appAsarPath)
-        
-        if isWritable {
-            updateStatus(for: "writePerm", status: .success)
-        } else {
-            updateStatus(for: "writePerm", status: .warning("Cannot write to Codex app.asar. You may need to grant Full Disk Access to Shimbar, or repair write permissions."))
+        // If Codex is present, patching is a main capability, so NPX and Write Permissions are critical!
+        if let index = items.firstIndex(where: { $0.id == "writePerm" }) {
+            items[index].isCritical = true
         }
+        if let index = items.firstIndex(where: { $0.id == "npx" }) {
+            items[index].isCritical = true
+        }
+        
+        let appPath = "/Applications/Codex.app"
+        let appAsarPath = "/Applications/Codex.app/Contents/Resources/app.asar"
+        let resourcesPath = "/Applications/Codex.app/Contents/Resources"
+        
+        // Check standard readability and POSIX w-bits
+        let isAppWritable = FileManager.default.isWritableFile(atPath: appPath)
+        let isAsarWritable = FileManager.default.isWritableFile(atPath: appAsarPath)
+        
+        // Programmatically detect if FDA is granted
+        let hasFDA = checkFullDiskAccess()
+        
+        // Physically test write access in Resources directory to be 100% sure
+        let testFilePath = "\(resourcesPath)/.shimbar_write_test"
+        var canWriteTestFile = false
+        if FileManager.default.isWritableFile(atPath: resourcesPath) {
+            do {
+                try "test".write(toFile: testFilePath, atomically: true, encoding: .utf8)
+                try FileManager.default.removeItem(atPath: testFilePath)
+                canWriteTestFile = true
+            } catch {
+                canWriteTestFile = false
+            }
+        }
+        
+        // Physically verify if app.asar is writable by attempting to open for writing
+        var canWriteAsar = false
+        if let fileHandle = FileHandle(forWritingAtPath: appAsarPath) {
+            canWriteAsar = true
+            try? fileHandle.close()
+        }
+        
+        if isAppWritable && isAsarWritable && hasFDA && (canWriteTestFile || canWriteAsar) {
+            updateStatus(for: "writePerm", status: .success)
+        } else if !hasFDA {
+            updateStatus(for: "writePerm", status: .failure("Full Disk Access is not granted to Shimbar. Without it, macOS will block re-signing and patching Codex."))
+        } else {
+            updateStatus(for: "writePerm", status: .failure("Cannot write to Codex app.asar or Resources folder. You may need to grant Full Disk Access to Shimbar, or repair write permissions."))
+        }
+    }
+    
+    private func checkFullDiskAccess() -> Bool {
+        // Try reading com.apple.TimeMachine.plist (requires Full Disk Access)
+        let tmPlist = "/Library/Preferences/com.apple.TimeMachine.plist"
+        if FileManager.default.isReadableFile(atPath: tmPlist) {
+            return true
+        }
+        
+        // Fallback check: try listing ~/Library/Safari contents
+        let safariPath = NSHomeDirectory() + "/Library/Safari"
+        if let _ = try? FileManager.default.contentsOfDirectory(atPath: safariPath) {
+            return true
+        }
+        
+        return false
     }
 }
