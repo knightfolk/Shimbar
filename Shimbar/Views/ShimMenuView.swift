@@ -205,10 +205,14 @@ struct ShimMenuView: View {
     // MARK: - Current Config
 
     private var configSection: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             Label("Codex status:", systemImage: "app.badge.checkmark")
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.secondary)
+            
+            Text(manager.isCodexPatched ? "patched" : "unpatched")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(manager.isCodexPatched ? Color.green : Color.red)
             
             Spacer()
             
@@ -216,28 +220,23 @@ struct ShimMenuView: View {
                 ProgressView()
                     .controlSize(.small)
             } else {
-                Button(action: {
-                    Task {
-                        do {
-                            if manager.isCodexPatched {
-                                try await manager.restoreApp()
-                            } else {
-                                try await manager.patchApp()
-                            }
-                        } catch {}
+                Toggle("", isOn: Binding(
+                    get: { manager.isCodexPatched },
+                    set: { newValue in
+                        Task {
+                            do {
+                                if newValue {
+                                    try await manager.patchApp()
+                                } else {
+                                    try await manager.restoreApp()
+                                }
+                            } catch {}
+                        }
                     }
-                }) {
-                    Text(manager.isCodexPatched ? "Patched" : "Unpatched")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(manager.isCodexPatched ? .white : Color(NSColor.labelColor))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(
-                            Capsule()
-                                .fill(manager.isCodexPatched ? Color.green : Color.secondary.opacity(0.15))
-                        )
-                }
-                .buttonStyle(.plain)
+                ))
+                .toggleStyle(.switch)
+                .controlSize(.small)
+                .labelsHidden()
             }
         }
         .padding(.horizontal, 12)
