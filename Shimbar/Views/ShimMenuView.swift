@@ -36,6 +36,8 @@ struct ShimMenuView: View {
             launchSection
             Divider().padding(.horizontal, 12)
             footerSection
+            Divider().padding(.horizontal, 12)
+            creditSection
         }
         .frame(width: 320)
         .padding(.vertical, 8)
@@ -166,22 +168,8 @@ struct ShimMenuView: View {
 
     private var headerSection: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 1) {
-                Text("Shimbar")
-                    .font(.system(size: 14, weight: .semibold))
-                
-                Button(action: {
-                    if let url = URL(string: "https://github.com/0xSero/codex-shim") {
-                        NSWorkspace.shared.open(url)
-                    }
-                }) {
-                    Text("by 0xSero (codex-shim)")
-                        .font(.system(size: 9))
-                        .foregroundStyle(Color.accentColor)
-                        .underline()
-                }
-                .buttonStyle(.plain)
-            }
+            Text("Shimbar")
+                .font(.system(size: 14, weight: .semibold))
 
             Spacer()
 
@@ -514,6 +502,25 @@ struct ShimMenuView: View {
     private func openSettingsWindow() {
         openSettings()
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private var creditSection: some View {
+        HStack {
+            Spacer()
+            Button(action: {
+                if let url = URL(string: "https://github.com/0xSero/codex-shim") {
+                    NSWorkspace.shared.open(url)
+                }
+            }) {
+                Text("0xSero (codex-shim)")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.secondary)
+                    .underline()
+            }
+            .buttonStyle(.plain)
+            Spacer()
+        }
+        .padding(.vertical, 4)
     }
 }
 
