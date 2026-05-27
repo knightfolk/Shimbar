@@ -216,38 +216,28 @@ struct ShimMenuView: View {
                 ProgressView()
                     .controlSize(.small)
             } else {
-                if manager.isCodexPatched {
-                    // Display-only badge when patched
-                    Text("Patched")
+                Button(action: {
+                    Task {
+                        do {
+                            if manager.isCodexPatched {
+                                try await manager.restoreApp()
+                            } else {
+                                try await manager.patchApp()
+                            }
+                        } catch {}
+                    }
+                }) {
+                    Text(manager.isCodexPatched ? "Patched" : "Unpatched")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(manager.isCodexPatched ? .white : Color(NSColor.labelColor))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
                         .background(
                             Capsule()
-                                .fill(Color.green)
+                                .fill(manager.isCodexPatched ? Color.green : Color.secondary.opacity(0.15))
                         )
-                } else {
-                    // Clickable button to trigger patching when unpatched
-                    Button(action: {
-                        Task {
-                            do {
-                                try await manager.patchApp()
-                            } catch {}
-                        }
-                    }) {
-                        Text("Unpatched")
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(Color(NSColor.labelColor))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(
-                                Capsule()
-                                    .fill(Color.secondary.opacity(0.15))
-                            )
-                    }
-                    .buttonStyle(.plain)
                 }
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 12)
@@ -348,34 +338,47 @@ struct ShimMenuView: View {
                 Image(systemName: "info.circle")
                     .font(.system(size: 10))
                     .foregroundStyle(.tertiary)
-                    .help("Lists configured models. Swap models here or roll this section up if you use the Codex dropdown patch.")
+                    .help(manager.isCodexPatched ? "Model selection is managed inside the patched Codex Desktop app picker." : "Lists configured models. Swap models here or roll this section up if you use the Codex dropdown patch.")
                 
-                if manager.settings.collapseModelSection, let activeModel = manager.activeModel {
-                    Text("(\(activeModel))")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(Color.accentColor)
-                        .padding(.leading, 4)
-                }
-                
-                Spacer()
-
-                // Collapse/Expand toggle button
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        manager.settings.collapseModelSection.toggle()
+                if manager.isCodexPatched {
+                    Spacer()
+                    
+                    HStack(spacing: 5) {
+                        Image(systemName: "checkmark.shield.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.green)
+                        Text("Controlled by Codex app")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.secondary)
                     }
-                }) {
-                    Image(systemName: manager.settings.collapseModelSection ? "chevron.right" : "chevron.down")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(.secondary)
+                } else {
+                    if manager.settings.collapseModelSection, let activeModel = manager.activeModel {
+                        Text("(\(activeModel))")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(Color.accentColor)
+                            .padding(.leading, 4)
+                    }
+                    
+                    Spacer()
+
+                    // Collapse/Expand toggle button
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            manager.settings.collapseModelSection.toggle()
+                        }
+                    }) {
+                        Image(systemName: manager.settings.collapseModelSection ? "chevron.right" : "chevron.down")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
             .padding(.horizontal, 12)
             .padding(.top, 8)
             .padding(.bottom, 4)
 
-            if !manager.settings.collapseModelSection {
+            if !manager.isCodexPatched && !manager.settings.collapseModelSection {
                 if manager.models.isEmpty {
                     Text("No models configured")
                         .font(.system(size: 12))
