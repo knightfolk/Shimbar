@@ -1,0 +1,529 @@
+import SwiftUI
+
+// MARK: - ShimMenuView
+
+/// The primary view shown in the menu bar popover.
+///
+/// Displays daemon status, model selection, quick actions, and access
+/// to settings. This is the main surface users interact with.
+struct ShimMenuView: View {
+
+    @Environment(ShimManager.self) private var manager
+    @Environment(\.openSettings) private var openSettings
+    @State private var showingProviderSetup = false
+    @State private var isAutoSetupRunning = false
+    @State private var autoSetupMessage: String? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            headerSection
+            Divider().padding(.horizontal, 12)
+            // Show setup assistant banner when binary isn't found
+            if !manager.shimFound {
+                setupBanner
+                Divider().padding(.horizontal, 12)
+            }
+            configSection
+            Divider().padding(.horizontal, 12)
+            toggleSection
+            Divider().padding(.horizontal, 12)
+            modelSection
+            Divider().padding(.horizontal, 12)
+            providerSection
+            Divider().padding(.horizontal, 12)
+            actionsSection
+            Divider().padding(.horizontal, 12)
+            launchSection
+            Divider().padding(.horizontal, 12)
+            footerSection
+        }
+        .frame(width: 320)
+        .padding(.vertical, 8)
+        .sheet(isPresented: $showingProviderSetup) {
+            ProviderSetupWizard()
+                .environment(manager)
+        }
+    }
+
+    // MARK: - Setup Assistant Banner
+
+    /// Shown when codex-shim cannot be located. Guides the user through
+    /// one-tap automatic discovery without needing to open Settings.
+    private var setupBanner: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: "wand.and.sparkles")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.orange)
+                Text("Setup Required")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.orange)
+                Spacer()
+            }
+
+            Text("Shimbar can't locate codex-shim. Tap Auto-Detect or Browse to find it.")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let msg = autoSetupMessage {
+                Text(msg)
+                    .font(.system(size: 10))
+                    .foregroundStyle(manager.shimFound ? Color.green : Color.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            // Show discovery diagnostic log on failure
+            if !manager.shimDiscoveryLog.isEmpty && !manager.shimFound && autoSetupMessage != nil {
+                ScrollView {
+                    Text(manager.shimDiscoveryLog)
+                        .font(.system(size: 9, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 60)
+                .padding(4)
+                .background(RoundedRectangle(cornerRadius: 4).fill(Color.black.opacity(0.08)))
+            }
+
+            HStack(spacing: 8) {
+                // Primary: Auto-detect
+                Button(action: runAutoSetup) {
+                    HStack(spacing: 6) {
+                        if isAutoSetupRunning {
+                            ProgressView().controlSize(.mini)
+                        } else {
+                            Image(systemName: "magnifyingglass").font(.system(size: 11))
+                        }
+                        Text(isAutoSetupRunning ? "Searching…" : "Auto-Detect")
+                            .font(.system(size: 12, weight: .medium))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 5)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isAutoSetupRunning)
+
+                // Secondary: Browse for file
+                Button(action: browseForShim) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "folder").font(.system(size: 11))
+                        Text("Browse…").font(.system(size: 12))
+                    }
+                    .padding(.vertical, 5)
+                }
+                .buttonStyle(.bordered)
+                .disabled(isAutoSetupRunning)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.orange.opacity(0.07))
+                .padding(.horizontal, 6)
+        )
+    }
+
+    private func runAutoSetup() {
+        isAutoSetupRunning = true
+        autoSetupMessage = nil
+        Task {
+            await manager.rediscoverShimPath()
+            await MainActor.run {
+                isAutoSetupRunning = false
+                if manager.shimFound {
+                    autoSetupMessage = "✓ Found at \(manager.shimPath)"
+                } else {
+                    autoSetupMessage = "Not found automatically — try Browse to locate it manually."
+                }
+            }
+        }
+    }
+
+    private func browseForShim() {
+        let panel = NSOpenPanel()
+        panel.title = "Locate codex-shim"
+        panel.message = "Select the codex-shim executable file."
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.directoryURL = URL(fileURLWithPath: NSHomeDirectory())
+        NSApp.activate(ignoringOtherApps: true)
+        if panel.runModal() == .OK, let url = panel.url {
+            let path = url.path
+            manager.settings.shimPath = path
+            Task {
+                await manager.rediscoverShimPath()
+                await MainActor.run {
+                    if manager.shimFound {
+                        autoSetupMessage = "✓ Set to \(path)"
+                    } else {
+                        autoSetupMessage = "File selected but may not be executable: \(path)"
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Header
+
+    private var headerSection: some View {
+        HStack {
+            Text("Shimbar")
+                .font(.system(size: 14, weight: .semibold))
+
+            Spacer()
+
+            statusBadge
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+    }
+
+    private var statusBadge: some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(manager.status.iconColor)
+                .frame(width: 8, height: 8)
+
+            Text(manager.status.displayText)
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    // MARK: - Current Config
+
+    private var configSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 4) {
+                Label("Current Config", systemImage: "doc.plaintext")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                
+                Image(systemName: "info.circle")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+                    .help("Shows the target config file and the number of custom models loaded.")
+                
+                Spacer()
+                
+                Text(configStatusText)
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(manager.models.isEmpty ? Color.secondary : Color.green)
+            }
+            
+            Text("~/.codex-shim/models.json")
+                .font(.system(size: 10, design: .monospaced))
+                .foregroundStyle(.secondary)
+                
+            if let lastError = manager.lastError {
+                HStack(alignment: .top, spacing: 4) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.red)
+                    Text(lastError)
+                        .font(.system(size: 9))
+                        .foregroundStyle(.red)
+                        .lineLimit(3)
+                }
+                .padding(.top, 2)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+    }
+    
+    private var configStatusText: String {
+        if manager.models.isEmpty {
+            return "Empty"
+        } else {
+            return "\(manager.models.count) models"
+        }
+    }
+
+    // MARK: - Enable/Disable Toggle
+
+    private var toggleSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 4) {
+                Label("Shim Daemon", systemImage: "power")
+                    .font(.system(size: 13))
+
+                Image(systemName: "info.circle")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+                    .help("Turn on/off the local proxy daemon and system-level configuration hooks.")
+
+                Spacer()
+
+                if manager.isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Toggle("", isOn: Binding(
+                        get: { manager.isEnabled },
+                        set: { newValue in
+                            Task {
+                                do {
+                                    if newValue { try await manager.enable() }
+                                    else { try await manager.disable() }
+                                } catch {
+                                    // Error shown in the error row below
+                                }
+                            }
+                        }
+                    ))
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
+                    .labelsHidden()
+                    .disabled(!manager.shimFound)
+                }
+            }
+
+            // Show binary-not-found warning inline
+            if !manager.shimFound {
+                HStack(spacing: 4) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.orange)
+                    Text("codex-shim not found — open Settings → General to set path")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.orange)
+                }
+            }
+
+            // Show last command error inline (cleared on next action)
+            if let err = manager.lastError, !err.isEmpty {
+                HStack(alignment: .top, spacing: 4) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.red)
+                    Text(err)
+                        .font(.system(size: 9))
+                        .foregroundStyle(.red)
+                        .lineLimit(3)
+                    Spacer()
+                    Button(action: { manager.lastError = nil }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 8))
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 2)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+    }
+
+    // MARK: - Model List
+
+    private var modelSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 4) {
+                Text("Active Model")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                
+                Image(systemName: "info.circle")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+                    .help("Lists configured models. Swap models here or roll this section up if you use the Codex dropdown patch.")
+                
+                if manager.settings.collapseModelSection, let activeModel = manager.activeModel {
+                    Text("(\(activeModel))")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(Color.accentColor)
+                        .padding(.leading, 4)
+                }
+                
+                Spacer()
+
+                // Collapse/Expand toggle button
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        manager.settings.collapseModelSection.toggle()
+                    }
+                }) {
+                    Image(systemName: manager.settings.collapseModelSection ? "chevron.right" : "chevron.down")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+
+            if !manager.settings.collapseModelSection {
+                if manager.models.isEmpty {
+                    Text("No models configured")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.tertiary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(manager.models, id: \.slug) { model in
+                            ModelListRow(
+                                model: model,
+                                isActive: manager.activeModel == model.slug,
+                                onSelect: { Task { try? await manager.switchModel(model.slug) } }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Add Provider
+
+    private var providerSection: some View {
+        MenuRow(
+            title: "Add Provider…",
+            icon: "plus.circle",
+            helpText: "Launch the step-by-step setup wizard to configure API keys and models for a new LLM provider.",
+            action: { showingProviderSetup = true }
+        )
+    }
+
+    // MARK: - Actions
+
+    private var actionsSection: some View {
+        VStack(spacing: 0) {
+            MenuRow(
+                title: "Restart Shim",
+                icon: "arrow.clockwise",
+                helpText: "Restart the local proxy process to reload settings or flush active connections.",
+                action: { Task { try? await manager.restart() } }
+            )
+
+            MenuRow(
+                title: "View Log",
+                icon: "doc.text",
+                helpText: "Open the real-time background log file in your system's default editor for diagnostics.",
+                action: { manager.openShimLog() }
+            )
+
+            MenuRow(
+                title: "Patch Codex Desktop",
+                icon: "wrench.and.screwdriver",
+                helpText: "Patch the Codex Desktop Electron app.asar bundle so you can select custom models directly inside its dropdown.",
+                action: { Task { try? await manager.patchApp() } }
+            )
+
+            MenuRow(
+                title: "Unpatch Codex Desktop",
+                icon: "arrow.uturn.backward",
+                helpText: "Restore Codex Desktop to its original clean backup, removing custom model menu extensions.",
+                action: { Task { try? await manager.restoreApp() } }
+            )
+        }
+    }
+
+    // MARK: - Launch Codex
+
+    private var launchSection: some View {
+        MenuRow(
+            title: "Launch Codex Desktop",
+            icon: "arrow.up.forward.app",
+            isProminent: true,
+            helpText: "Open the Codex Desktop application main user interface screen.",
+            action: { Task { try? await manager.launchCodexApp() } }
+        )
+    }
+
+    // MARK: - Footer
+
+    private var footerSection: some View {
+        HStack(spacing: 0) {
+            MenuRow(
+                title: "Settings…",
+                icon: "gear",
+                shortcut: "⌘,",
+                helpText: "Open the tabbed advanced preferences window for ports, paths, and custom environment settings.",
+                action: { openSettingsWindow() }
+            )
+
+            Spacer()
+
+            MenuRow(
+                title: "Quit",
+                icon: "xmark.circle",
+                shortcut: "⌘Q",
+                helpText: "Quit the Shimbar menu bar utility application.",
+                action: { NSApplication.shared.terminate(nil) }
+            )
+        }
+        .padding(.horizontal, 0)
+    }
+
+    // MARK: - Helpers
+
+    private func openSettingsWindow() {
+        openSettings()
+        NSApp.activate(ignoringOtherApps: true)
+    }
+}
+
+// MARK: - MenuRow
+
+/// A reusable row used throughout the menu popover for action items.
+struct MenuRow: View {
+
+    let title: String
+    let icon: String
+    var isProminent: Bool = false
+    var shortcut: String? = nil
+    var helpText: String? = nil
+    let action: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .foregroundStyle(isProminent ? Color.accentColor : Color.secondary)
+                    .frame(width: 16)
+
+                Text(title)
+                    .font(.system(size: 13, weight: isProminent ? .medium : .regular))
+
+                if let helpText {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.tertiary)
+                        .help(helpText)
+                }
+
+                Spacer()
+
+                if let shortcut {
+                    Text(shortcut)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 5)
+            .contentShape(Rectangle())
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(isHovered ? Color.accentColor.opacity(0.1) : .clear)
+                    .padding(.horizontal, 4)
+            )
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
