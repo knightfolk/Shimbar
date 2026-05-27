@@ -2,6 +2,20 @@
 
 A premium, native macOS menu bar companion for the `codex-shim` local proxy daemon. **Shimbar** provides a gorgeous, visual interface directly in your Apple menu bar to control the local proxy server, add model providers, switch active coding models in real-time, and patch Codex Desktop with one click.
 
+[![Download Shimbar](https://img.shields.io/badge/Download-Latest_Release-indigo.svg?style=for-the-badge&logo=apple)](https://github.com/knightfolk/Shimbar/releases)
+
+---
+
+## 📸 Preview
+
+### Menu Companion
+<img src="assets/menu_bar_view.png" width="320" alt="Shimbar Menu Companion">
+
+### Settings & Preferences Panels
+| Providers Manager | Models Manager | Advanced Developer Options |
+| :---: | :---: | :---: |
+| <img src="assets/providers_tab.png" width="280" alt="Providers"> | <img src="assets/models_tab.png" width="280" alt="Models"> | <img src="assets/advanced_tab.png" width="280" alt="Advanced"> |
+
 ---
 
 ## ✨ Features
@@ -29,7 +43,15 @@ A premium, native macOS menu bar companion for the `codex-shim` local proxy daem
 
 ## 🚀 Getting Started
 
-### 1. Generate the Xcode Project
+### 📦 Quick Install (Recommended)
+
+1. Go to the [Releases](https://github.com/knightfolk/Shimbar/releases) section on GitHub.
+2. Download the latest **`Shimbar-Beta.dmg`** package.
+3. Mount the DMG and drag **Shimbar** to your **Applications** folder to install.
+
+### 🛠️ Building from Source
+
+#### 1. Generate the Xcode Project
 
 Generate the native `.xcodeproj` bundle from our declarative `project.yml` file:
 
@@ -37,7 +59,7 @@ Generate the native `.xcodeproj` bundle from our declarative `project.yml` file:
 make generate
 ```
 
-### 2. Build the Application
+#### 2. Build the Application
 
 Build the debug bundle using the command line or open `Shimbar.xcodeproj` in Xcode to run, test, and profile:
 
@@ -45,7 +67,7 @@ Build the debug bundle using the command line or open `Shimbar.xcodeproj` in Xco
 make build
 ```
 
-### 3. Run Shimbar
+#### 3. Run Shimbar
 
 Launch the compiled `.app` package:
 
