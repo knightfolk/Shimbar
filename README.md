@@ -73,7 +73,7 @@ make run
 
 ## 🔒 Security
 
-All credentials are saved using native macOS **Keychain Services**. They are referenced by provider type (e.g. `openai`, `anthropic`, `minimax`) under the service `com.shimbar.api-keys`. The `models.json` config file written to disk is entirely stripped of raw credentials and safe for sharing or backup.
+All credentials are saved securely using native macOS **Keychain Services** for robust local backup. In addition, credentials are saved in the local `~/.codex-shim/models.json` file so that the background `codex-shim` proxy daemon can read them to authenticate requests with upstream LLM providers. Please keep your `models.json` file private as it contains these credentials in plaintext.
 
 ---
 

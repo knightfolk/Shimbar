@@ -24,13 +24,13 @@ class ProviderSetupWindowManager {
         
         let setupView = ProviderSetupWizard()
             .environment(manager)
-            .frame(width: 580, height: 500)
+            .frame(minWidth: 580, maxWidth: 800, minHeight: 500, maxHeight: 700)
         
         let hostingView = NSHostingView(rootView: setupView)
         
         let newWindow = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 580, height: 500),
-            styleMask: [.titled, .closable, .miniaturizable],
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )

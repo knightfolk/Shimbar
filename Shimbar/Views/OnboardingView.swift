@@ -41,7 +41,7 @@ struct OnboardingView: View {
             // Footer section with diagnostic action and main continue buttons
             footerSection
         }
-        .frame(width: 580, height: 500)
+        .frame(minWidth: 580, maxWidth: 800, minHeight: 500, maxHeight: 700)
         .onAppear {
             runDiagnostics()
         }

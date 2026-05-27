@@ -75,6 +75,10 @@ final class ShimManager {
     /// Timer used for periodic status polling.
     private var pollingTimer: Timer?
 
+    /// Cache variables for Codex app.asar modification tracking to avoid redundant disk I/O.
+    private var lastCheckedAsarModDate: Date?
+    private var lastCheckedAsarSize: UInt64?
+
     // MARK: - Initialization
 
     private init() {}
@@ -248,15 +252,33 @@ final class ShimManager {
         return nil
     }
 
-    /// Uses `find` across common directories as a last resort.
+    /// Uses `find` across targeted developer subdirectories as a last resort.
     private func findShimWithFind(log: inout [String]) async -> String? {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let possibleSubdirs = [
+            "\(home)/Developer",
+            "\(home)/Projects",
+            "\(home)/Downloads",
+            "\(home)/Documents",
+            "\(home)/codex-shim",
+            "\(home)/.local"
+        ]
+        
+        let searchRoots = possibleSubdirs.filter { FileManager.default.fileExists(atPath: $0) }
+        guard !searchRoots.isEmpty else {
+            log.append("    find: no candidate subdirectories found")
+            return nil
+        }
+        
         do {
-            let result = try await ProcessRunner.run(
-                "/usr/bin/find",
-                arguments: [home, "-maxdepth", "8", "-name", "codex-shim", "-type", "f", "-o",
-                            home, "-maxdepth", "8", "-name", "codex-shim", "-type", "l"]
-            )
+            var args = searchRoots
+            args.append(contentsOf: [
+                "-maxdepth", "6",
+                "-name", "codex-shim",
+                "(", "-type", "f", "-o", "-type", "l", ")"
+            ])
+            
+            let result = try await ProcessRunner.run("/usr/bin/find", arguments: args)
             let paths = result.stdout.components(separatedBy: .newlines)
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                 .filter { !$0.isEmpty }
@@ -282,14 +304,33 @@ final class ShimManager {
     // MARK: - CLI Wrappers
 
     /// Checks if the Codex Desktop app is patched by looking for the needle/replacement in app.asar.
+    /// Uses file metadata caching to avoid redundant byte scans.
     func checkCodexPatchedStatus() async {
         let appAsarPath = "/Applications/Codex.app/Contents/Resources/app.asar"
         guard FileManager.default.fileExists(atPath: appAsarPath) else {
             isCodexPatched = false
+            lastCheckedAsarModDate = nil
+            lastCheckedAsarSize = nil
             return
         }
 
         do {
+            let attributes = try FileManager.default.attributesOfItem(atPath: appAsarPath)
+            let modDate = attributes[.modificationDate] as? Date
+            let size = attributes[.size] as? UInt64
+
+            // If attributes haven't changed since last check, return cached value
+            if let lastMod = lastCheckedAsarModDate,
+               let lastSize = lastCheckedAsarSize,
+               lastMod == modDate,
+               lastSize == size {
+                return
+            }
+
+            // Update modification attributes
+            lastCheckedAsarModDate = modDate
+            lastCheckedAsarSize = size
+
             // Read app.asar. Since it's large (159MB), we do this using safe options.
             let url = URL(fileURLWithPath: appAsarPath)
             let data = try Data(contentsOf: url, options: .mappedIfSafe)
@@ -303,6 +344,8 @@ final class ShimManager {
             }
         } catch {
             isCodexPatched = false
+            lastCheckedAsarModDate = nil
+            lastCheckedAsarSize = nil
         }
     }
 
@@ -312,13 +355,14 @@ final class ShimManager {
     /// such as *running* or *stopped*, and extracts the active model count.
     func refreshStatus() async {
         await checkCodexPatchedStatus()
+        await loadLogTail() // Load logs automatically on status ticks to share polling timer resource
         do {
             let result = try await ProcessRunner.runShim(
                 "status",
                 shimPath: settings.shimPath,
                 port: settings.port
             )
-            parseStatusOutput(result.stdout)
+            parseStatusOutput(result.stdout, exitCode: result.exitCode)
         } catch {
             // If the command itself fails, the shim is almost certainly not running.
             status = .stopped
@@ -738,19 +782,35 @@ final class ShimManager {
     /// - "Active model: gpt-4o"
     /// - "Models: 5"
     /// - "Enabled: true/false"
-    private func parseStatusOutput(_ output: String) {
+    /// Parse the text output and exit code from `codex-shim status` and update published state.
+    private func parseStatusOutput(_ output: String, exitCode: Int32) {
         let lowered = output.lowercased()
 
-        // Determine running state
-        if lowered.contains("running") {
-            status = .running
-            isEnabled = true
-        } else if lowered.contains("stopped") || lowered.contains("not running") {
+        // 1. If command reported non-zero status exit code, it's typically stopped or not configured.
+        if exitCode != 0 {
             status = .stopped
             isEnabled = false
-        } else {
-            status = .unknown
+            activeModel = nil
+            return
+        }
+
+        // 2. Determine running state with robust string keyword matching
+        if lowered.contains("running") || lowered.contains("active") || lowered.contains("started") || lowered.contains("online") {
+            status = .running
+            isEnabled = true
+        } else if lowered.contains("stopped") || lowered.contains("not running") || lowered.contains("offline") || lowered.contains("inactive") {
+            status = .stopped
             isEnabled = false
+            activeModel = nil
+        } else {
+            // Fallback: if exit code is 0 but keywords are absent, assume running if stdout is present
+            if !output.isEmpty {
+                status = .running
+                isEnabled = true
+            } else {
+                status = .unknown
+                isEnabled = false
+            }
         }
 
         // Extract active model

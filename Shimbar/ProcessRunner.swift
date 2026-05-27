@@ -51,11 +51,29 @@ actor ProcessRunner {
 
     // MARK: - Run Command
 
+    /// Resolves the absolute URL for a command or executable, searching enriched PATH if it's a bare command name.
+    private static func resolveExecutableURL(_ command: String) -> URL? {
+        if command.hasPrefix("/") || command.hasPrefix(".") {
+            let url = URL(fileURLWithPath: command)
+            return FileManager.default.isExecutableFile(atPath: url.path) ? url : nil
+        }
+        
+        let pathEnv = enrichedPath()
+        let dirs = pathEnv.components(separatedBy: ":")
+        for dir in dirs {
+            let url = URL(fileURLWithPath: dir).appendingPathComponent(command)
+            if FileManager.default.isExecutableFile(atPath: url.path) {
+                return url
+            }
+        }
+        return nil
+    }
+
     /// Runs an executable at the given path with arguments and an
     /// optional custom environment, capturing stdout and stderr.
     ///
-    /// The command is executed through `/bin/zsh -l -c` so that the
-    /// user's login shell profile is sourced and `PATH` is available.
+    /// It attempts direct binary execution if the executable can be resolved
+    /// in the enriched PATH; otherwise, it falls back to zsh shell execution.
     ///
     /// - Parameters:
     ///   - command: The command or path to the executable.
@@ -73,24 +91,31 @@ actor ProcessRunner {
         let stdoutPipe = Pipe()
         let stderrPipe = Pipe()
 
-        // Build the full shell command string.
-        let fullCommand = ([command] + arguments)
-            .map { arg in
-                // Escape single quotes inside arguments for safe shell expansion.
-                let escaped = arg.replacingOccurrences(of: "'", with: "'\\''")
-                return "'\(escaped)'"
-            }
-            .joined(separator: " ")
-
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-l", "-c", fullCommand]
-        process.standardOutput = stdoutPipe
-        process.standardError = stderrPipe
-
         // Merge environment.
         var env = environment ?? ProcessInfo.processInfo.environment
         env["PATH"] = enrichedPath()
         process.environment = env
+
+        // Attempt direct binary execution if executable is resolved, bypassing shell overhead.
+        if let resolvedURL = resolveExecutableURL(command) {
+            process.executableURL = resolvedURL
+            process.arguments = arguments
+        } else {
+            // Fallback: run via zsh (without -l to avoid sourcing heavy interactive profiles)
+            let fullCommand = ([command] + arguments)
+                .map { arg in
+                    // Escape single quotes inside arguments for safe shell expansion.
+                    let escaped = arg.replacingOccurrences(of: "'", with: "'\\''")
+                    return "'\(escaped)'"
+                }
+                .joined(separator: " ")
+
+            process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+            process.arguments = ["-c", fullCommand]
+        }
+
+        process.standardOutput = stdoutPipe
+        process.standardError = stderrPipe
 
         return try await withCheckedThrowingContinuation { continuation in
             process.terminationHandler = { _ in

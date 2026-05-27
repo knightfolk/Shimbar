@@ -33,6 +33,6 @@ struct SettingsView: View {
                     Label("Advanced", systemImage: "gearshape.2")
                 }
         }
-        .frame(width: 620, height: 480)
+        .frame(minWidth: 620, maxWidth: 850, minHeight: 480, maxHeight: 700)
     }
 }

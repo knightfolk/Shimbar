@@ -26,6 +26,8 @@ struct ModelEditorSheet: View {
     @State private var extraHeaders: [(key: String, value: String)] = []
     @State private var newHeaderKey: String = ""
     @State private var newHeaderValue: String = ""
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -192,7 +194,12 @@ struct ModelEditorSheet: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
         }
-        .frame(width: 480, height: 520)
+        .frame(minWidth: 480, maxWidth: 600, minHeight: 520, maxHeight: 650)
+        .alert("Failed to Save Model", isPresented: $showingErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
         .onAppear {
             populateFields()
         }
@@ -278,7 +285,10 @@ struct ModelEditorSheet: View {
                     dismiss()
                 }
             } catch {
-                // Handle error
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    showingErrorAlert = true
+                }
             }
         }
     }

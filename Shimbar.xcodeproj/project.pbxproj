@@ -25,13 +25,17 @@
 		5B5D8C36C0E083B6A2833E5B /* ProviderCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DB58BEC92C7EAA0FD770B0 /* ProviderCatalog.swift */; };
 		6610E52BF77D4A99C71DF560 /* GeneralSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DBA3693890C3C1D5CAF4008 /* GeneralSettingsTab.swift */; };
 		68CB2ACE664DB43FC1AFB7A3 /* ModelEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069A933D58596AE4FD5C2877 /* ModelEditorSheet.swift */; };
+		6A46F92BD34494FC1D5C33CE /* ModelsJsonManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206DD1AF91AF1F93DE99A29F /* ModelsJsonManagerTests.swift */; };
 		6B058C6B59C6679FBD141D9A /* ModelsSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42D4E81616FAF06B722CD4D4 /* ModelsSettingsTab.swift */; };
+		72FCE2F1F1FB221CE4B2DE09 /* ProcessRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D932368BD8501309E54E6B33 /* ProcessRunnerTests.swift */; };
 		ADFB56984CAB3D03ED02B0AE /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E33280C5429B61F5834C3B /* OnboardingView.swift */; };
 		AF5E13C9456DCB0792CB03F6 /* AdvancedSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27DB01BA850457CD3C54A6A1 /* AdvancedSettingsTab.swift */; };
 		B1585733304D2AE013808D8F /* ShimbarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECB1D8213B22B0E3A1E9665 /* ShimbarApp.swift */; };
 		B7B14C4C39AF5A2F2C88EE48 /* LoginItemManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 481027CE46AA9FB8F37BD88E /* LoginItemManager.swift */; };
 		BD69AC32E96B1264E4B5A712 /* ShimMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB795178DED988F5103FA78 /* ShimMenuView.swift */; };
 		C1A09C6A6617CBB646212A16 /* ProviderSetupWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1FE36D6BBF73AF5F232130 /* ProviderSetupWizard.swift */; };
+		C8C7A668D40A63D3C0468DB8 /* KeychainManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A17E94226B9C40783BD3FBA /* KeychainManagerTests.swift */; };
+		FAD463AD2896B15863C85B5A /* ApiKeyValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E72FA82D4FD1543797F9594 /* ApiKeyValidatorTests.swift */; };
 		FC3DE6A8FC326FF96EE5A50C /* ModelsJsonManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75820BB7C35F43FF8757AA30 /* ModelsJsonManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -50,6 +54,8 @@
 		0491C49EB9B363FB4BBA16CD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		056AA117861EE64F2CEBAB72 /* StartupValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupValidator.swift; sourceTree = "<group>"; };
 		069A933D58596AE4FD5C2877 /* ModelEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelEditorSheet.swift; sourceTree = "<group>"; };
+		1E72FA82D4FD1543797F9594 /* ApiKeyValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKeyValidatorTests.swift; sourceTree = "<group>"; };
+		206DD1AF91AF1F93DE99A29F /* ModelsJsonManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsJsonManagerTests.swift; sourceTree = "<group>"; };
 		25E33280C5429B61F5834C3B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		26A421B343D32815D6D22284 /* ShimbarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShimbarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27DB01BA850457CD3C54A6A1 /* AdvancedSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsTab.swift; sourceTree = "<group>"; };
@@ -61,6 +67,7 @@
 		481027CE46AA9FB8F37BD88E /* LoginItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemManager.swift; sourceTree = "<group>"; };
 		545FF169AB727B29D43C3B10 /* ShimManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimManager.swift; sourceTree = "<group>"; };
 		6748755516C506A573A6E7AF /* ProvidersSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersSettingsTab.swift; sourceTree = "<group>"; };
+		6A17E94226B9C40783BD3FBA /* KeychainManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManagerTests.swift; sourceTree = "<group>"; };
 		6A3D75D7E64A1F26034FF481 /* ProviderSetupWindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSetupWindowManager.swift; sourceTree = "<group>"; };
 		6E37EBEB2E70E9EF544C6776 /* OnboardingWindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindowManager.swift; sourceTree = "<group>"; };
 		75820BB7C35F43FF8757AA30 /* ModelsJsonManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsJsonManager.swift; sourceTree = "<group>"; };
@@ -75,6 +82,7 @@
 		D5DB58BEC92C7EAA0FD770B0 /* ProviderCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderCatalog.swift; sourceTree = "<group>"; };
 		D76FEAAFC7731500C13B92B4 /* ShimModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimModel.swift; sourceTree = "<group>"; };
 		D92E2ABFDDC107F468F9CBB4 /* ApiKeyValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKeyValidator.swift; sourceTree = "<group>"; };
+		D932368BD8501309E54E6B33 /* ProcessRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRunnerTests.swift; sourceTree = "<group>"; };
 		FCB795178DED988F5103FA78 /* ShimMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimMenuView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -82,6 +90,10 @@
 		2B57CF296D8703001142414C /* ShimbarTests */ = {
 			isa = PBXGroup;
 			children = (
+				1E72FA82D4FD1543797F9594 /* ApiKeyValidatorTests.swift */,
+				6A17E94226B9C40783BD3FBA /* KeychainManagerTests.swift */,
+				206DD1AF91AF1F93DE99A29F /* ModelsJsonManagerTests.swift */,
+				D932368BD8501309E54E6B33 /* ProcessRunnerTests.swift */,
 			);
 			path = ShimbarTests;
 			sourceTree = "<group>";
@@ -241,6 +253,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAD463AD2896B15863C85B5A /* ApiKeyValidatorTests.swift in Sources */,
+				C8C7A668D40A63D3C0468DB8 /* KeychainManagerTests.swift in Sources */,
+				6A46F92BD34494FC1D5C33CE /* ModelsJsonManagerTests.swift in Sources */,
+				72FCE2F1F1FB221CE4B2DE09 /* ProcessRunnerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,7 +307,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Shimbar/Shimbar.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_TESTABILITY = YES;
 				INFOPLIST_FILE = Shimbar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = Shimbar;
@@ -314,6 +332,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_NAME = ShimbarTests;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Shimbar.app/Contents/MacOS/Shimbar";
 			};
 			name = Debug;
@@ -322,7 +343,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Shimbar/Shimbar.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_TESTABILITY = YES;
 				INFOPLIST_FILE = Shimbar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = Shimbar;
@@ -345,6 +368,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_NAME = ShimbarTests;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Shimbar.app/Contents/MacOS/Shimbar";
 			};
 			name = Release;

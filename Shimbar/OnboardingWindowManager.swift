@@ -26,13 +26,14 @@ class OnboardingWindowManager {
             self?.close()
         })
         .environment(manager)
+        .frame(minWidth: 580, maxWidth: 800, minHeight: 500, maxHeight: 700)
         
         let hostingView = NSHostingView(rootView: onboardingView)
         
         // Define clean, native macOS window style
         let newWindow = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 580, height: 500),
-            styleMask: [.titled, .closable, .miniaturizable],
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )

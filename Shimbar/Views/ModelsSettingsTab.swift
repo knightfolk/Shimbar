@@ -9,6 +9,8 @@ struct ModelsSettingsTab: View {
     @State private var selectedModelSlug: String? = nil
     @State private var showingEditorSheet = false
     @State private var editingModel: ShimModel? = nil
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -86,6 +88,11 @@ struct ModelsSettingsTab: View {
             ModelEditorSheet(modelToEdit: editingModel)
                 .environment(manager)
         }
+        .alert("Failed to Delete Model", isPresented: $showingErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
     }
     
     private func deleteSelectedModel() {
@@ -110,7 +117,10 @@ struct ModelsSettingsTab: View {
                     self.selectedModelSlug = nil
                 }
             } catch {
-                // Failed to delete model
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    showingErrorAlert = true
+                }
             }
         }
     }

@@ -6,11 +6,10 @@ generate:
 	xcodegen generate
 
 build:
-	xcodebuild -scheme Shimbar -project Shimbar.xcodeproj -configuration Debug
+	xcodebuild -scheme Shimbar -project Shimbar.xcodeproj -configuration Debug -derivedDataPath .build
 
 run:
-	open "/Users/kevink/Library/Developer/Xcode/DerivedData/Shimbar-akucyxaumvcqexaitrgxaaambulq/Build/Products/Debug/Shimbar.app"
+	open ".build/Build/Products/Debug/Shimbar.app"
 
 clean:
-	rm -rf Shimbar.xcodeproj
-	xcodebuild -scheme Shimbar -project Shimbar.xcodeproj -configuration Debug clean
+	rm -rf Shimbar.xcodeproj .build

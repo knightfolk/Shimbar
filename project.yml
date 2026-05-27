@@ -27,6 +27,8 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         COMBINE_HIDPI_IMAGES: YES
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+        ENABLE_TESTABILITY: YES
+        CODE_SIGN_ENTITLEMENTS: Shimbar/Shimbar.entitlements
 
   ShimbarTests:
     type: bundle.unit-test
@@ -37,5 +39,8 @@ targets:
       - target: Shimbar
     settings:
       base:
+        PRODUCT_NAME: ShimbarTests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: "-"
         BUNDLE_LOADER: "$(TEST_HOST)"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Shimbar.app/Contents/MacOS/Shimbar"

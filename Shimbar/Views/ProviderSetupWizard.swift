@@ -28,6 +28,8 @@ struct ProviderSetupWizard: View {
     @State private var isValidating: Bool = false
     @State private var validationResult: ValidationResult? = nil
     @State private var discoveredModelIds: [String] = []
+    @State private var errorMessage: String? = nil
+    @State private var showingErrorAlert: Bool = false
     
     // Step 3: Selected Models
     @State private var checkedModelIds: Set<String> = []
@@ -121,7 +123,14 @@ struct ProviderSetupWizard: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
         }
-        .frame(width: 580, height: 500)
+        .frame(minWidth: 580, maxWidth: 800, minHeight: 500, maxHeight: 700)
+        .alert("Error", isPresented: $showingErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            if let msg = errorMessage {
+                Text(msg)
+            }
+        }
     }
     
     private var wizardTitle: String {
@@ -251,6 +260,11 @@ struct ProviderSetupWizard: View {
                     .foregroundStyle(.secondary)
                 TextField("https://api.myllm.com/v1", text: $customBaseURL)
                     .textFieldStyle(.roundedBorder)
+                if !customBaseURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isValidURL(customBaseURL) {
+                    Text("Please enter a valid HTTP/HTTPS URL (starting with http:// or https://)")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.red)
+                }
             }
             
             HStack(spacing: 16) {
@@ -313,7 +327,7 @@ struct ProviderSetupWizard: View {
     private var isNextDisabled: Bool {
         if let provider = selectedProvider {
             if provider.id == "custom" {
-                return customProviderName.isEmpty || customBaseURL.isEmpty
+                return customProviderName.isEmpty || customBaseURL.isEmpty || !isValidURL(customBaseURL)
             } else if provider.id == "omlx" {
                 return isValidating
             } else {
@@ -575,10 +589,18 @@ struct ProviderSetupWizard: View {
                 }
             } catch {
                 await MainActor.run {
-                    self.validationResult = .invalid(reason: error.localizedDescription)
+                    self.errorMessage = error.localizedDescription
+                    self.showingErrorAlert = true
                 }
             }
         }
+    }
+    
+    private func isValidURL(_ string: String) -> Bool {
+        guard let url = URL(string: string.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            return false
+        }
+        return url.scheme == "http" || url.scheme == "https"
     }
 }
 

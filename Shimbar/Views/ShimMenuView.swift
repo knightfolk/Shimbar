@@ -12,6 +12,7 @@ struct ShimMenuView: View {
     @Environment(\.openSettings) private var openSettings
     @State private var isAutoSetupRunning = false
     @State private var autoSetupMessage: String? = nil
+    @State private var isPatching = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -217,30 +218,35 @@ struct ShimMenuView: View {
                 
                 Spacer()
                 
-                if manager.isLoading {
+                if isPatching {
                     ProgressView()
                         .controlSize(.small)
-                } else {
-                    Toggle("", isOn: Binding(
-                        get: { manager.isCodexPatched },
-                        set: { newValue in
-                            Task {
-                                do {
-                                    if newValue {
-                                        try await manager.patchApp()
-                                    } else {
-                                        try await manager.restoreApp()
-                                    }
-                                } catch {
-                                    await manager.checkCodexPatchedStatus()
-                                }
-                            }
-                        }
-                    ))
-                    .toggleStyle(.switch)
-                    .controlSize(.small)
-                    .labelsHidden()
+                        .padding(.trailing, 4)
                 }
+                
+                Toggle("", isOn: Binding(
+                    get: { manager.isCodexPatched },
+                    set: { newValue in
+                        isPatching = true
+                        Task {
+                            do {
+                                if newValue {
+                                    try await manager.patchApp()
+                                } else {
+                                    try await manager.restoreApp()
+                                }
+                            } catch {
+                                // Error is shown in the inline error row below
+                            }
+                            await manager.checkCodexPatchedStatus()
+                            isPatching = false
+                        }
+                    }
+                ))
+                .toggleStyle(.switch)
+                .controlSize(.small)
+                .labelsHidden()
+                .disabled(isPatching)
             }
             
             // Show patch/unpatch errors right underneath if they happen
@@ -484,6 +490,7 @@ struct ShimMenuView: View {
                 title: "Settings…",
                 icon: "gear",
                 shortcut: "⌘,",
+                expand: false,
                 helpText: "Open the tabbed advanced preferences window for ports, paths, and custom environment settings.",
                 action: { openSettingsWindow() }
             )
@@ -494,6 +501,7 @@ struct ShimMenuView: View {
                 title: "Quit",
                 icon: "xmark.circle",
                 shortcut: "⌘Q",
+                expand: false,
                 helpText: "Quit the Shimbar menu bar utility application.",
                 action: { NSApplication.shared.terminate(nil) }
             )
@@ -518,6 +526,7 @@ struct MenuRow: View {
     let icon: String
     var isProminent: Bool = false
     var shortcut: String? = nil
+    var expand: Bool = true
     var helpText: String? = nil
     let action: () -> Void
 
@@ -541,12 +550,15 @@ struct MenuRow: View {
                         .help(helpText)
                 }
 
-                Spacer()
+                if expand {
+                    Spacer()
+                }
 
                 if let shortcut {
                     Text(shortcut)
                         .font(.system(size: 11))
                         .foregroundStyle(.tertiary)
+                        .padding(.leading, expand ? 0 : 8)
                 }
             }
             .padding(.horizontal, 12)

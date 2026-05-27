@@ -10,6 +10,8 @@ struct ProvidersSettingsTab: View {
     @State private var editingProvider: String? = nil // Stores providerId being edited
     @State private var newApiKey: String = ""
     @State private var showingEditAlert = false
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
     
     private let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -97,6 +99,11 @@ struct ProvidersSettingsTab: View {
                 }
             )
         }
+        .alert("Error", isPresented: $showingErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
     }
     
     private var editingProviderTitle: String {
@@ -131,7 +138,8 @@ struct ProvidersSettingsTab: View {
                 }
             }
         } catch {
-            // Handle error
+            errorMessage = error.localizedDescription
+            showingErrorAlert = true
         }
         
         showingEditAlert = false
@@ -146,7 +154,10 @@ struct ProvidersSettingsTab: View {
             do {
                 try await manager.removeProvider(identifier)
             } catch {
-                // Failed to remove provider
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    showingErrorAlert = true
+                }
             }
         }
     }
@@ -294,17 +305,17 @@ struct EditApiKeySheet: View {
                     onSave()
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(apiKey.trimimmingCharacters().isEmpty)
+                .disabled(apiKey.trimmingCharacters().isEmpty)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
         }
-        .frame(width: 420, height: 200)
+        .frame(minWidth: 420, maxWidth: 500, minHeight: 200, maxHeight: 250)
     }
 }
 
 extension String {
-    func trimimmingCharacters() -> String {
+    func trimmingCharacters() -> String {
         return self.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
