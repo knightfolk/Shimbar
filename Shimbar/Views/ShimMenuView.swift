@@ -425,19 +425,21 @@ struct ShimMenuView: View {
                 action: { manager.openShimLog() }
             )
 
-            MenuRow(
-                title: "Patch Codex Desktop",
-                icon: "wrench.and.screwdriver",
-                helpText: "Patch the Codex Desktop Electron app.asar bundle so you can select custom models directly inside its dropdown.",
-                action: { Task { try? await manager.patchApp() } }
-            )
-
-            MenuRow(
-                title: "Unpatch Codex Desktop",
-                icon: "arrow.uturn.backward",
-                helpText: "Restore Codex Desktop to its original clean backup, removing custom model menu extensions.",
-                action: { Task { try? await manager.restoreApp() } }
-            )
+            if manager.isCodexPatched {
+                MenuRow(
+                    title: "Unpatch Codex Desktop",
+                    icon: "arrow.uturn.backward",
+                    helpText: "Restore Codex Desktop to its original clean backup, removing custom model menu extensions.",
+                    action: { Task { try? await manager.restoreApp() } }
+                )
+            } else {
+                MenuRow(
+                    title: "Patch Codex Desktop",
+                    icon: "wrench.and.screwdriver",
+                    helpText: "Patch the Codex Desktop Electron app.asar bundle so you can select custom models directly inside its dropdown.",
+                    action: { Task { try? await manager.patchApp() } }
+                )
+            }
         }
     }
 

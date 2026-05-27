@@ -32,6 +32,9 @@ final class ShimManager {
     /// Whether the shim is fully enabled (config installed + process running).
     var isEnabled: Bool = false
 
+    /// Whether the Codex Desktop app is currently patched.
+    var isCodexPatched: Bool = false
+
     /// All models loaded from `models.json`.
     var models: [ShimModel] = []
 
@@ -278,11 +281,37 @@ final class ShimManager {
 
     // MARK: - CLI Wrappers
 
+    /// Checks if the Codex Desktop app is patched by looking for the needle/replacement in app.asar.
+    func checkCodexPatchedStatus() async {
+        let appAsarPath = "/Applications/Codex.app/Contents/Resources/app.asar"
+        guard FileManager.default.fileExists(atPath: appAsarPath) else {
+            isCodexPatched = false
+            return
+        }
+
+        do {
+            // Read app.asar. Since it's large (159MB), we do this using safe options.
+            let url = URL(fileURLWithPath: appAsarPath)
+            let data = try Data(contentsOf: url, options: .mappedIfSafe)
+            
+            // Search for the replacement string "let u=!1,d;"
+            if let replacementData = "let u=!1,d;".data(using: .utf8),
+               data.range(of: replacementData) != nil {
+                isCodexPatched = true
+            } else {
+                isCodexPatched = false
+            }
+        } catch {
+            isCodexPatched = false
+        }
+    }
+
     /// Query the shim process for its current status.
     ///
     /// Parses the text output of `codex-shim status` looking for keywords
     /// such as *running* or *stopped*, and extracts the active model count.
     func refreshStatus() async {
+        await checkCodexPatchedStatus()
         do {
             let result = try await ProcessRunner.runShim(
                 "status",
@@ -468,7 +497,9 @@ final class ShimManager {
                 shimPath: settings.shimPath,
                 port: settings.port
             )
+            await checkCodexPatchedStatus()
         } catch {
+            await checkCodexPatchedStatus()
             lastError = "Patch app failed: \(error.localizedDescription)"
             throw error
         }
@@ -486,7 +517,9 @@ final class ShimManager {
                 shimPath: settings.shimPath,
                 port: settings.port
             )
+            await checkCodexPatchedStatus()
         } catch {
+            await checkCodexPatchedStatus()
             lastError = "Restore app failed: \(error.localizedDescription)"
             throw error
         }
