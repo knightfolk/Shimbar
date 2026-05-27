@@ -64,6 +64,7 @@ struct ProviderCatalog {
         openRouter,
         together,
         fireworks,
+        omlx,
         custom,
     ]
 
@@ -473,7 +474,30 @@ struct ProviderCatalog {
         authStyle: .bearer
     )
 
-    // 12. Custom
+    // 12. oMLX
+    private static let omlx = ProviderDefinition(
+        id: "omlx",
+        name: "oMLX",
+        icon: "cpu",
+        shimProvider: "openai",
+        defaultBaseURL: "http://localhost:8000/v1",
+        keyPlaceholder: "None (local server)",
+        keyValidationPath: "/models",
+        docsURL: URL(string: "https://omlx.ai")!,
+        models: [
+            ProviderModelDef(
+                modelId: "llama3",
+                displayName: "Llama 3 (Local)",
+                maxContextLimit: 8192,
+                maxOutputTokens: 2048,
+                supportsImages: false,
+                isRecommended: true
+            )
+        ],
+        authStyle: .bearer
+    )
+
+    // 13. Custom
     private static let custom = ProviderDefinition(
         id: "custom",
         name: "Custom",

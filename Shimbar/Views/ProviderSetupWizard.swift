@@ -91,16 +91,25 @@ struct ProviderSetupWizard: View {
                     .disabled(selectedProvider == nil)
                     .buttonStyle(.borderedProminent)
                 } else if currentStep == .enterCredentials {
-                    Button(selectedProvider?.id == "custom" ? "Next" : "Validate & Next") {
-                        if selectedProvider?.id == "custom" {
-                            prepareCustomModels()
-                            currentStep = .selectModels
-                        } else {
-                            validateAndNext()
+                    HStack(spacing: 8) {
+                        if validationResult != nil {
+                            Button("Skip Validation") {
+                                skipValidationAndContinue()
+                            }
+                            .buttonStyle(.bordered)
                         }
+                        
+                        Button(selectedProvider?.id == "custom" ? "Next" : "Validate & Next") {
+                            if selectedProvider?.id == "custom" {
+                                prepareCustomModels()
+                                currentStep = .selectModels
+                            } else {
+                                validateAndNext()
+                            }
+                        }
+                        .disabled(isNextDisabled)
+                        .buttonStyle(.borderedProminent)
                     }
-                    .disabled(isNextDisabled)
-                    .buttonStyle(.borderedProminent)
                 } else if currentStep == .selectModels {
                     Button("Done") {
                         finishSetup()
@@ -139,7 +148,12 @@ struct ProviderSetupWizard: View {
                             selectedProvider = provider
                             // Auto fill placeholders/defaults
                             if provider.id != "custom" {
-                                apiKey = KeychainManager.getKey(forProvider: provider.id) ?? ""
+                                let stored = KeychainManager.getKey(forProvider: provider.id) ?? ""
+                                if stored.isEmpty && provider.id == "omlx" {
+                                    apiKey = "local"
+                                } else {
+                                    apiKey = stored
+                                }
                             }
                         }
                     )
@@ -300,6 +314,8 @@ struct ProviderSetupWizard: View {
         if let provider = selectedProvider {
             if provider.id == "custom" {
                 return customProviderName.isEmpty || customBaseURL.isEmpty
+            } else if provider.id == "omlx" {
+                return isValidating
             } else {
                 return apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isValidating
             }
@@ -484,6 +500,17 @@ struct ProviderSetupWizard: View {
                 }
             }
         }
+    }
+    
+    private func skipValidationAndContinue() {
+        guard let provider = selectedProvider else { return }
+        // Populate checkedModelIds with provider default models
+        self.discoveredModelIds = provider.models.map { $0.modelId }
+        self.checkedModelIds = Set(provider.models.filter { $0.isRecommended }.map { $0.modelId })
+        if self.checkedModelIds.isEmpty {
+            self.checkedModelIds = Set(provider.models.map { $0.modelId })
+        }
+        self.currentStep = .selectModels
     }
     
     private func prepareCustomModels() {
