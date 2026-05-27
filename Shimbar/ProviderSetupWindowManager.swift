@@ -24,12 +24,12 @@ class ProviderSetupWindowManager {
         
         let setupView = ProviderSetupWizard()
             .environment(manager)
-            .frame(width: 500, height: 450)
+            .frame(width: 540, height: 480)
         
         let hostingView = NSHostingView(rootView: setupView)
         
         let newWindow = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 500, height: 450),
+            contentRect: NSRect(x: 0, y: 0, width: 540, height: 480),
             styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered,
             defer: false
@@ -38,6 +38,12 @@ class ProviderSetupWindowManager {
         newWindow.title = "Add a Provider"
         newWindow.contentView = hostingView
         newWindow.center()
+        
+        // Offset 50 pixels to the left to prevent overlapping with the menu popover
+        var windowFrame = newWindow.frame
+        windowFrame.origin.x -= 50
+        newWindow.setFrame(windowFrame, display: true)
+        
         newWindow.isReleasedWhenClosed = false
         
         // Setup close delegate to clean up reference
