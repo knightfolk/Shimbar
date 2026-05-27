@@ -30,7 +30,7 @@ struct ProvidersSettingsTab: View {
                     }
                     Spacer()
                     Button {
-                        showingAddWizard = true
+                        ProviderSetupWindowManager.shared.show(manager: manager)
                     } label: {
                         Label("Add Provider", systemImage: "plus")
                     }
@@ -53,7 +53,7 @@ struct ProvidersSettingsTab: View {
                             .padding(.horizontal, 40)
                         
                         Button("Launch Setup Wizard") {
-                            showingAddWizard = true
+                            ProviderSetupWindowManager.shared.show(manager: manager)
                         }
                         .buttonStyle(.bordered)
                         .padding(.top, 8)
@@ -87,10 +87,7 @@ struct ProvidersSettingsTab: View {
             }
             .padding(20)
         }
-        .sheet(isPresented: $showingAddWizard) {
-            ProviderSetupWizard()
-                .environment(manager)
-        }
+
         .sheet(isPresented: $showingEditAlert) {
             EditApiKeySheet(
                 title: editingProviderTitle,

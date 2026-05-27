@@ -10,7 +10,6 @@ struct ShimMenuView: View {
 
     @Environment(ShimManager.self) private var manager
     @Environment(\.openSettings) private var openSettings
-    @State private var showingProviderSetup = false
     @State private var isAutoSetupRunning = false
     @State private var autoSetupMessage: String? = nil
 
@@ -39,10 +38,6 @@ struct ShimMenuView: View {
         }
         .frame(width: 320)
         .padding(.vertical, 8)
-        .sheet(isPresented: $showingProviderSetup) {
-            ProviderSetupWizard()
-                .environment(manager)
-        }
     }
 
     // MARK: - Setup Assistant Banner
@@ -399,7 +394,7 @@ struct ShimMenuView: View {
             title: "Add Provider…",
             icon: "plus.circle",
             helpText: "Launch the step-by-step setup wizard to configure API keys and models for a new LLM provider.",
-            action: { showingProviderSetup = true }
+            action: { ProviderSetupWindowManager.shared.show(manager: manager) }
         )
     }
 

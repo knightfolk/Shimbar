@@ -12,6 +12,7 @@
 		0A442C81E17374F7A97CA543 /* OnboardingWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E37EBEB2E70E9EF544C6776 /* OnboardingWindowManager.swift */; };
 		1568B11111D5D55B27338E32 /* ProvidersSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6748755516C506A573A6E7AF /* ProvidersSettingsTab.swift */; };
 		1A0C1D35CC8A5656C091F2AF /* ShimModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76FEAAFC7731500C13B92B4 /* ShimModel.swift */; };
+		38E8F5F0E552CDF3C97221D4 /* ProviderSetupWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A3D75D7E64A1F26034FF481 /* ProviderSetupWindowManager.swift */; };
 		4285E5473F5ED034B6902FF8 /* StartupValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056AA117861EE64F2CEBAB72 /* StartupValidator.swift */; };
 		4614916A01CC51D0218CE524 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82214BF7026932AC48F47FD9 /* KeychainManager.swift */; };
 		46EFCF3BDAF0E98EFD8EC9F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8208C35D2E4501436F3CBF34 /* Assets.xcassets */; };
@@ -60,6 +61,7 @@
 		481027CE46AA9FB8F37BD88E /* LoginItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemManager.swift; sourceTree = "<group>"; };
 		545FF169AB727B29D43C3B10 /* ShimManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimManager.swift; sourceTree = "<group>"; };
 		6748755516C506A573A6E7AF /* ProvidersSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersSettingsTab.swift; sourceTree = "<group>"; };
+		6A3D75D7E64A1F26034FF481 /* ProviderSetupWindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSetupWindowManager.swift; sourceTree = "<group>"; };
 		6E37EBEB2E70E9EF544C6776 /* OnboardingWindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindowManager.swift; sourceTree = "<group>"; };
 		75820BB7C35F43FF8757AA30 /* ModelsJsonManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsJsonManager.swift; sourceTree = "<group>"; };
 		7DBA3693890C3C1D5CAF4008 /* GeneralSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsTab.swift; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 				75820BB7C35F43FF8757AA30 /* ModelsJsonManager.swift */,
 				6E37EBEB2E70E9EF544C6776 /* OnboardingWindowManager.swift */,
 				0066D129B18227F02F51711C /* ProcessRunner.swift */,
+				6A3D75D7E64A1F26034FF481 /* ProviderSetupWindowManager.swift */,
 				3BEB3534948DB0F4C10BE0E8 /* Shimbar.entitlements */,
 				AECB1D8213B22B0E3A1E9665 /* ShimbarApp.swift */,
 				545FF169AB727B29D43C3B10 /* ShimManager.swift */,
@@ -259,6 +262,7 @@
 				0A442C81E17374F7A97CA543 /* OnboardingWindowManager.swift in Sources */,
 				075303B2551EF3E0A2DDEC06 /* ProcessRunner.swift in Sources */,
 				5B5D8C36C0E083B6A2833E5B /* ProviderCatalog.swift in Sources */,
+				38E8F5F0E552CDF3C97221D4 /* ProviderSetupWindowManager.swift in Sources */,
 				C1A09C6A6617CBB646212A16 /* ProviderSetupWizard.swift in Sources */,
 				1568B11111D5D55B27338E32 /* ProvidersSettingsTab.swift in Sources */,
 				4C41D019A9C8D43B86634FD8 /* SettingsView.swift in Sources */,
