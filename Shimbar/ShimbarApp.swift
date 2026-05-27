@@ -31,6 +31,14 @@ struct ShimbarApp: App {
         Task { @MainActor in
             await ShimManager.shared.bootstrap()
             ShimManager.shared.startPolling()
+            
+            // Check if onboarding/diagnostics is needed (binary missing or models empty)
+            let hasBinary = ShimManager.shared.shimFound
+            let hasModels = ModelsJsonManager.shared.hasModels
+            
+            if !hasBinary || !hasModels {
+                OnboardingWindowManager.shared.show(manager: ShimManager.shared)
+            }
         }
     }
 }

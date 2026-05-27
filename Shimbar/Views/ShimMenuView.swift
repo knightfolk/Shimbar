@@ -425,6 +425,13 @@ struct ShimMenuView: View {
                 action: { manager.openShimLog() }
             )
 
+            MenuRow(
+                title: "Diagnostics & Onboarding…",
+                icon: "checklist",
+                helpText: "Run environment checks, grant permissions, and configure dependencies.",
+                action: { OnboardingWindowManager.shared.show(manager: manager) }
+            )
+
             if manager.isCodexPatched {
                 MenuRow(
                     title: "Unpatch Codex Desktop",
