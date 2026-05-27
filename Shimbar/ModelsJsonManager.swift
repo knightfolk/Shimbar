@@ -152,8 +152,17 @@ class ModelsJsonManager {
             models.removeAll { $0.baseUrl == provider.defaultBaseURL }
             try? KeychainManager.deleteKey(forProvider: providerId)
         } else {
-            // Fallback: if it's not a known provider, maybe match slug or other fields
-            models.removeAll { $0.slug.hasPrefix("\(providerId)-") }
+            // Check if providerId is a base URL (as it is for custom providers)
+            let normalizedId = providerId.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            let matchesBaseUrl = models.contains { $0.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/")) == normalizedId }
+            
+            if matchesBaseUrl {
+                models.removeAll { $0.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/")) == normalizedId }
+                try? KeychainManager.deleteKey(forProvider: providerId)
+            } else {
+                // Fallback: match by slug prefix
+                models.removeAll { $0.slug.hasPrefix("\(providerId)-") }
+            }
         }
         
         try save()
