@@ -65,6 +65,7 @@ struct ProviderCatalog {
         together,
         fireworks,
         omlx,
+        opencodeGo,
         custom,
     ]
 
@@ -497,7 +498,38 @@ struct ProviderCatalog {
         authStyle: .bearer
     )
 
-    // 13. Custom
+    // 13. OpenCode Go
+    private static let opencodeGo = ProviderDefinition(
+        id: "opencode-go",
+        name: "OpenCode Go",
+        icon: "play.circle.fill",
+        shimProvider: "openai",
+        defaultBaseURL: "https://opencode.ai/zen/go/v1",
+        keyPlaceholder: "oc-...",
+        keyValidationPath: "/models",
+        docsURL: URL(string: "https://opencode.ai")!,
+        models: [
+            ProviderModelDef(
+                modelId: "qwen2.5-coder",
+                displayName: "Qwen 2.5 Coder",
+                maxContextLimit: 128_000,
+                maxOutputTokens: 8_192,
+                supportsImages: false,
+                isRecommended: true
+            ),
+            ProviderModelDef(
+                modelId: "deepseek-coder",
+                displayName: "DeepSeek Coder",
+                maxContextLimit: 128_000,
+                maxOutputTokens: 8_192,
+                supportsImages: false,
+                isRecommended: true
+            )
+        ],
+        authStyle: .bearer
+    )
+
+    // 14. Custom
     private static let custom = ProviderDefinition(
         id: "custom",
         name: "Custom",

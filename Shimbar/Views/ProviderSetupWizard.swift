@@ -121,7 +121,7 @@ struct ProviderSetupWizard: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
         }
-        .frame(width: 550, height: 480)
+        .frame(width: 580, height: 500)
     }
     
     private var wizardTitle: String {
