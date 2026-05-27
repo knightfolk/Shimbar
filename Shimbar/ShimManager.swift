@@ -496,15 +496,23 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
-        // Run the CLI command. We capture the error but don't throw yet —
-        // the codesign sub-step can fail even when the patch bytes were written.
+        let isAppWritable = FileManager.default.isWritableFile(atPath: "/Applications/Codex.app")
+        let isAsarWritable = FileManager.default.isWritableFile(atPath: "/Applications/Codex.app/Contents/Resources/app.asar")
+        let needsElevation = !isAppWritable || !isAsarWritable
+
         var cliError: Error?
         do {
-            let result = try await ProcessRunner.runShim(
-                "patch-app",
-                shimPath: settings.shimPath,
-                port: settings.port
-            )
+            let result: ProcessResult
+            if needsElevation {
+                let args = ["--port", "\(settings.port)", "patch-app"]
+                result = try await ProcessRunner.runElevated(settings.shimPath, arguments: args)
+            } else {
+                result = try await ProcessRunner.runShim(
+                    "patch-app",
+                    shimPath: settings.shimPath,
+                    port: settings.port
+                )
+            }
             // If the CLI itself reported a clear failure before writing the patch, surface it.
             if !result.succeeded && result.stdout.contains("Could not find") {
                 lastError = result.stderr.isEmpty ? result.stdout : result.stderr
@@ -537,13 +545,22 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
+        let isAppWritable = FileManager.default.isWritableFile(atPath: "/Applications/Codex.app")
+        let isAsarWritable = FileManager.default.isWritableFile(atPath: "/Applications/Codex.app/Contents/Resources/app.asar")
+        let needsElevation = !isAppWritable || !isAsarWritable
+
         var cliError: Error?
         do {
-            _ = try await ProcessRunner.runShim(
-                "restore-app",
-                shimPath: settings.shimPath,
-                port: settings.port
-            )
+            if needsElevation {
+                let args = ["--port", "\(settings.port)", "restore-app"]
+                _ = try await ProcessRunner.runElevated(settings.shimPath, arguments: args)
+            } else {
+                _ = try await ProcessRunner.runShim(
+                    "restore-app",
+                    shimPath: settings.shimPath,
+                    port: settings.port
+                )
+            }
         } catch {
             cliError = error
         }
