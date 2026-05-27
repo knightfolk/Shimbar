@@ -161,8 +161,18 @@ struct OnboardingView: View {
     }
     
     private func openSystemSettingsFDA() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
-            NSWorkspace.shared.open(url)
+        let alert = NSAlert()
+        alert.messageText = "How to Grant Full Disk Access"
+        alert.informativeText = "macOS requires you to manually add Shimbar to the Full Disk Access list:\n\n1. Click 'Open Settings' to open the Full Disk Access panel.\n2. Click the '+' (plus) button at the bottom of the list of apps.\n3. Enter your Mac password/use Touch ID if prompted.\n4. Navigate to your Applications folder (or wherever Shimbar.app is located) and select Shimbar.app.\n5. Ensure the toggle switch next to Shimbar in the list is ON (green)."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Open Settings")
+        alert.addButton(withTitle: "Cancel")
+        
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
+                NSWorkspace.shared.open(url)
+            }
         }
     }
 }
