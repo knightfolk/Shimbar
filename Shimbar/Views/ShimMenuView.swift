@@ -170,8 +170,22 @@ struct ShimMenuView: View {
 
     private var headerSection: some View {
         HStack {
-            Text("Shimbar")
-                .font(.system(size: 14, weight: .semibold))
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Shimbar")
+                    .font(.system(size: 14, weight: .semibold))
+                
+                Button(action: {
+                    if let url = URL(string: "https://github.com/0xSero/codex-shim") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }) {
+                    Text("by 0xSero (codex-shim)")
+                        .font(.system(size: 9))
+                        .foregroundStyle(Color.accentColor)
+                        .underline()
+                }
+                .buttonStyle(.plain)
+            }
 
             Spacer()
 
