@@ -249,7 +249,7 @@ struct ProviderCatalog {
         name: "Z.AI (Zhipu)",
         icon: "flame",
         shimProvider: "openai",
-        defaultBaseURL: "https://api.z.ai/api",
+        defaultBaseURL: "https://api.z.ai/api/paas/v4",
         keyPlaceholder: "Bearer token...",
         keyValidationPath: "/models",
         docsURL: URL(string: "https://z.ai")!,

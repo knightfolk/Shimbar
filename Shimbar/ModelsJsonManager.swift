@@ -50,6 +50,7 @@ class ModelsJsonManager {
             self.models = decodedFile.models
             
             // Decrypt keys from Keychain for models that don't have them in JSON but do have a provider
+            var didDecryptAny = false
             for i in 0..<self.models.count {
                 let model = self.models[i]
                 if model.apiKey.isEmpty {
@@ -57,9 +58,13 @@ class ModelsJsonManager {
                     if let providerDef = ProviderCatalog.provider(forBaseURL: model.baseUrl) {
                         if let storedKey = KeychainManager.getKey(forProvider: providerDef.id) {
                             self.models[i].apiKey = storedKey
+                            didDecryptAny = true
                         }
                     }
                 }
+            }
+            if didDecryptAny {
+                try? save()
             }
         } catch {
             self.models = []
@@ -71,17 +76,13 @@ class ModelsJsonManager {
     func save() throws {
         try ensureDirectoryExists()
         
-        // Create models array for JSON, stripping sensitive API keys if they should be in keychain instead
-        // Let's copy models and strip key but save it to Keychain if it's there
+        // Backup API keys securely to Keychain while keeping them in models.json so codex-shim proxy can read them.
         var modelsToSave: [ShimModel] = []
         for model in models {
             var modelCopy = model
-            
-            // Extract and save key to Keychain if it's not empty, then strip from file
             if !model.apiKey.isEmpty {
                 if let providerDef = ProviderCatalog.provider(forBaseURL: model.baseUrl) {
                     try? KeychainManager.saveKey(model.apiKey, forProvider: providerDef.id)
-                    modelCopy.apiKey = "" // Blank in file for safety
                 }
             }
             modelsToSave.append(modelCopy)
