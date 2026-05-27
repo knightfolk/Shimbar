@@ -486,22 +486,48 @@ final class ShimManager {
     }
 
     /// Apply the codex-shim patch to the Codex desktop app.
+    ///
+    /// The codesign re-signing step can fail with a non-zero exit code even
+    /// when the ASAR patch was written successfully (e.g. on a fresh permissions
+    /// grant). We always verify the actual ASAR content after the command runs,
+    /// and only surface an error if the patch genuinely did not take effect.
     func patchApp() async throws {
         isLoading = true
         lastError = nil
         defer { isLoading = false }
 
+        // Run the CLI command. We capture the error but don't throw yet —
+        // the codesign sub-step can fail even when the patch bytes were written.
+        var cliError: Error?
         do {
-            _ = try await ProcessRunner.runShim(
+            let result = try await ProcessRunner.runShim(
                 "patch-app",
                 shimPath: settings.shimPath,
                 port: settings.port
             )
-            await checkCodexPatchedStatus()
+            // If the CLI itself reported a clear failure before writing the patch, surface it.
+            if !result.succeeded && result.stdout.contains("Could not find") {
+                lastError = result.stderr.isEmpty ? result.stdout : result.stderr
+                throw NSError(domain: "ShimManager", code: Int(result.exitCode),
+                              userInfo: [NSLocalizedDescriptionKey: lastError!])
+            }
         } catch {
-            await checkCodexPatchedStatus()
-            lastError = "Patch app failed: \(error.localizedDescription)"
-            throw error
+            cliError = error
+        }
+
+        // Ground-truth check: did the ASAR actually get patched?
+        await checkCodexPatchedStatus()
+
+        if isCodexPatched {
+            // Patch took effect — success regardless of codesign exit code.
+            lastError = nil
+        } else if let err = cliError {
+            lastError = "Patch failed: \(err.localizedDescription)"
+            throw err
+        } else {
+            lastError = "Patch did not take effect. Check that Codex Desktop is installed at /Applications/Codex.app."
+            throw NSError(domain: "ShimManager", code: -1,
+                          userInfo: [NSLocalizedDescriptionKey: lastError!])
         }
     }
 
@@ -511,17 +537,30 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
+        var cliError: Error?
         do {
             _ = try await ProcessRunner.runShim(
                 "restore-app",
                 shimPath: settings.shimPath,
                 port: settings.port
             )
-            await checkCodexPatchedStatus()
         } catch {
-            await checkCodexPatchedStatus()
-            lastError = "Restore app failed: \(error.localizedDescription)"
-            throw error
+            cliError = error
+        }
+
+        // Ground-truth check: is the ASAR now unpatched?
+        await checkCodexPatchedStatus()
+
+        if !isCodexPatched {
+            // Restore took effect — success.
+            lastError = nil
+        } else if let err = cliError {
+            lastError = "Restore failed: \(err.localizedDescription)"
+            throw err
+        } else {
+            lastError = "Restore did not take effect."
+            throw NSError(domain: "ShimManager", code: -1,
+                          userInfo: [NSLocalizedDescriptionKey: lastError!])
         }
     }
 
