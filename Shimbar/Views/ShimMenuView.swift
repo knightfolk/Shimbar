@@ -210,52 +210,48 @@ struct ShimMenuView: View {
     // MARK: - Current Config
 
     private var configSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 4) {
-                Label("Current Config", systemImage: "doc.plaintext")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                
-                Image(systemName: "info.circle")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.tertiary)
-                    .help("Shows the target config file and the number of custom models loaded.")
-                
-                Spacer()
-                
-                Text(configStatusText)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(manager.models.isEmpty ? Color.secondary : Color.green)
-            }
-            
-            Text("~/.codex-shim/models.json")
-                .font(.system(size: 10, design: .monospaced))
+        HStack(spacing: 8) {
+            Label("Codex status:", systemImage: "app.badge.checkmark")
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.secondary)
-                
-            if let lastError = manager.lastError {
-                HStack(alignment: .top, spacing: 4) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 10))
-                        .foregroundStyle(.red)
-                    Text(lastError)
-                        .font(.system(size: 9))
-                        .foregroundStyle(.red)
-                        .lineLimit(3)
+            
+            Spacer()
+            
+            if manager.isLoading {
+                ProgressView()
+                    .controlSize(.small)
+            } else {
+                Button(action: {
+                    Task {
+                        do {
+                            if manager.isCodexPatched {
+                                try await manager.restoreApp()
+                            } else {
+                                try await manager.patchApp()
+                            }
+                        } catch {}
+                    }
+                }) {
+                    Text(manager.isCodexPatched ? "Patched" : "Unpatched")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(manager.isCodexPatched ? .white : Color(NSColor.labelColor))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(manager.isCodexPatched ? Color.green : Color.secondary.opacity(0.15))
+                        )
                 }
-                .padding(.top, 2)
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-    }
-    
-    private var configStatusText: String {
-        if manager.models.isEmpty {
-            return "Empty"
-        } else {
-            return "\(manager.models.count) models"
-        }
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(NSColor.alternatingContentBackgroundColors[0]).opacity(0.4))
+                .padding(.horizontal, 6)
+        )
     }
 
     // MARK: - Enable/Disable Toggle
@@ -432,21 +428,6 @@ struct ShimMenuView: View {
                 action: { OnboardingWindowManager.shared.show(manager: manager) }
             )
 
-            if manager.isCodexPatched {
-                MenuRow(
-                    title: "Unpatch Codex Desktop",
-                    icon: "arrow.uturn.backward",
-                    helpText: "Restore Codex Desktop to its original clean backup, removing custom model menu extensions.",
-                    action: { Task { try? await manager.restoreApp() } }
-                )
-            } else {
-                MenuRow(
-                    title: "Patch Codex Desktop",
-                    icon: "wrench.and.screwdriver",
-                    helpText: "Patch the Codex Desktop Electron app.asar bundle so you can select custom models directly inside its dropdown.",
-                    action: { Task { try? await manager.patchApp() } }
-                )
-            }
         }
     }
 
