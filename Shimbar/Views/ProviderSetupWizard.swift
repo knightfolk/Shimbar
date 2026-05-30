@@ -590,7 +590,7 @@ struct ProviderSetupWizard: View {
                     try await manager.addProvider(provider: customDef, selectedModels: customModels, apiKey: apiKey)
                 } else {
                     let availableModels: [ProviderModelDef]
-                    if provider.id == "omlx" && !discoveredModelIds.isEmpty {
+                    if !discoveredModelIds.isEmpty {
                         availableModels = discoveredCatalogModels
                     } else {
                         availableModels = provider.models.isEmpty ? discoveredCatalogModels : provider.models
