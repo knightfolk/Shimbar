@@ -70,6 +70,10 @@ struct ProvidersSettingsTab: View {
                                 providerDef: group.providerDef,
                                 baseUrl: group.baseUrl,
                                 models: group.models,
+                                onConfigure: {
+                                    let provider = group.providerDef ?? ProviderCatalog.provider(forId: "custom")
+                                    ProviderSetupWindowManager.shared.show(manager: manager, preselectedProvider: provider)
+                                },
                                 onEditKey: {
                                     if let prov = group.providerDef {
                                         editingProvider = prov.id
@@ -170,6 +174,7 @@ struct ProviderGroupCard: View {
     let baseUrl: String
     let models: [ShimModel]
     
+    let onConfigure: () -> Void
     let onEditKey: () -> Void
     let onRemove: () -> Void
     
@@ -223,6 +228,10 @@ struct ProviderGroupCard: View {
                 Spacer()
                 
                 HStack(spacing: 8) {
+                    Button("Configure", action: onConfigure)
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        
                     Button("Edit Key", action: onEditKey)
                         .buttonStyle(.bordered)
                         .controlSize(.small)

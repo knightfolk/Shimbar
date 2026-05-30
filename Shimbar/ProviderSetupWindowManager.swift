@@ -15,14 +15,14 @@ class ProviderSetupWindowManager {
     private init() {}
     
     /// Present the setup wizard in a standalone utility window
-    func show(manager: ShimManager) {
+    func show(manager: ShimManager, preselectedProvider: ProviderDefinition? = nil) {
         if let existingWindow = window {
             existingWindow.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
             return
         }
         
-        let setupView = ProviderSetupWizard()
+        let setupView = ProviderSetupWizard(preselectedProvider: preselectedProvider)
             .environment(manager)
             .frame(minWidth: 580, maxWidth: 800, minHeight: 500, maxHeight: 700)
         

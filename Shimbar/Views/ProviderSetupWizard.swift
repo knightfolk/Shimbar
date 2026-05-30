@@ -41,6 +41,22 @@ struct ProviderSetupWizard: View {
         GridItem(.adaptive(minimum: 110, maximum: 140), spacing: 12)
     ]
     
+    init(preselectedProvider: ProviderDefinition? = nil) {
+        _selectedProvider = State(initialValue: preselectedProvider)
+        if let provider = preselectedProvider {
+            _currentStep = State(initialValue: .enterCredentials)
+            let stored = KeychainManager.getKey(forProvider: provider.id) ?? ""
+            if stored.isEmpty && provider.id == "omlx" {
+                _apiKey = State(initialValue: "local")
+            } else {
+                _apiKey = State(initialValue: stored)
+            }
+        } else {
+            _currentStep = State(initialValue: .selectProvider)
+            _apiKey = State(initialValue: "")
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -359,7 +375,7 @@ struct ProviderSetupWizard: View {
             ScrollView {
                 VStack(spacing: 0) {
                     if let provider = selectedProvider {
-                        let availableModels = (provider.id == "omlx" && !discoveredModelIds.isEmpty) ? discoveredCatalogModels : (provider.models.isEmpty ? discoveredCatalogModels : provider.models)
+                        let availableModels = !discoveredModelIds.isEmpty ? discoveredCatalogModels : (provider.models.isEmpty ? discoveredCatalogModels : provider.models)
                         if availableModels.isEmpty {
                             Text("No models discovered. Complete setup to add models manually.")
                                 .font(.caption)
