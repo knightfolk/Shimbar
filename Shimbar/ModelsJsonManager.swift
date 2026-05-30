@@ -126,10 +126,19 @@ class ModelsJsonManager {
                 slugName = "\(provider.id)-\(modelDef.modelId)"
             }
             
+            let providerDisplayName: String
+            if provider.id == "zhipu" {
+                providerDisplayName = "Z.AI"
+            } else if provider.id == "opencode-go" {
+                providerDisplayName = "OC"
+            } else {
+                providerDisplayName = provider.name
+            }
+            
             let newModel = ShimModel(
                 slug: slugName,
                 model: modelDef.modelId,
-                displayName: "\(provider.name) \(modelDef.displayName)",
+                displayName: "\(providerDisplayName) \(modelDef.displayName)",
                 provider: provider.shimProvider,
                 baseUrl: provider.defaultBaseURL,
                 apiKey: apiKey,
