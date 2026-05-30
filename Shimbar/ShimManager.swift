@@ -335,9 +335,12 @@ final class ShimManager {
             let url = URL(fileURLWithPath: appAsarPath)
             let data = try Data(contentsOf: url, options: .mappedIfSafe)
             
-            // Search for the replacement string "let u=!1,d;"
-            if let replacementData = "let u=!1,d;".data(using: .utf8),
-               data.range(of: replacementData) != nil {
+            // Search for the signature comment "codex-shim-patched" or the legacy replacement "let u=!1,d;"
+            if let signature = "codex-shim-patched".data(using: .utf8),
+               data.range(of: signature) != nil {
+                isCodexPatched = true
+            } else if let legacyReplacement = "let u=!1,d;".data(using: .utf8),
+                      data.range(of: legacyReplacement) != nil {
                 isCodexPatched = true
             } else {
                 isCodexPatched = false
