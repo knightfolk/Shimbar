@@ -13,6 +13,7 @@ struct ShimMenuView: View {
     @State private var isAutoSetupRunning = false
     @State private var autoSetupMessage: String? = nil
     @State private var isPatching = false
+    @State private var isUpdatingShim = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -21,6 +22,11 @@ struct ShimMenuView: View {
             // Show setup assistant banner when binary isn't found
             if !manager.shimFound {
                 setupBanner
+                Divider().padding(.horizontal, 12)
+            }
+            // Show update banner when upstream has new commits
+            if manager.updater.updateAvailable && !manager.updater.isDismissed {
+                updateBanner
                 Divider().padding(.horizontal, 12)
             }
             configSection
@@ -160,6 +166,88 @@ struct ShimMenuView: View {
                         autoSetupMessage = "File selected but may not be executable: \(path)"
                     }
                 }
+            }
+        }
+    }
+
+    // MARK: - Update Banner
+
+    /// Shown when the upstream codex-shim repository has newer commits
+    /// than the locally installed version.
+    private var updateBanner: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.blue)
+                Text("Update Available")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.blue)
+                Spacer()
+                Button(action: { manager.updater.isDismissed = true }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+
+            HStack(spacing: 4) {
+                Text("Local:")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                Text(manager.updater.localCommitHash ?? "???")
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(.primary)
+                Text("→")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+                Text("Remote:")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                Text(manager.updater.remoteCommitHash ?? "???")
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(.primary)
+            }
+
+            if let err = manager.updater.lastUpdateError {
+                Text(err)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Button(action: runShimUpdate) {
+                HStack(spacing: 6) {
+                    if isUpdatingShim {
+                        ProgressView().controlSize(.mini)
+                    } else {
+                        Image(systemName: "arrow.down.circle").font(.system(size: 11))
+                    }
+                    Text(isUpdatingShim ? "Updating…" : "Update Now")
+                        .font(.system(size: 12, weight: .medium))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 5)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(isUpdatingShim)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.blue.opacity(0.07))
+                .padding(.horizontal, 6)
+        )
+    }
+
+    private func runShimUpdate() {
+        isUpdatingShim = true
+        Task {
+            await manager.updater.performUpdate(shimManager: manager)
+            await MainActor.run {
+                isUpdatingShim = false
             }
         }
     }

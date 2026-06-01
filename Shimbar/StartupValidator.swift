@@ -96,6 +96,13 @@ final class StartupValidator {
                 description: "Verifies write permissions to allow modifying and re-signing Codex.",
                 status: .checking,
                 isCritical: false
+            ),
+            CheckItem(
+                id: "shimUpdate",
+                title: "codex-shim Updates",
+                description: "Checks if your local codex-shim installation is up to date with the latest upstream changes.",
+                status: .checking,
+                isCritical: false
             )
         ]
     }
@@ -119,6 +126,9 @@ final class StartupValidator {
         
         // 5. Check signature write permission
         await checkWritePermissions(hasCodex: hasCodex, hasNpx: hasNpx)
+        
+        // 6. Check for codex-shim updates
+        await checkShimUpdate()
         
         isChecking = false
     }
@@ -262,5 +272,27 @@ final class StartupValidator {
         }
         
         return false
+    }
+    
+    private func checkShimUpdate() async {
+        updateStatus(for: "shimUpdate", status: .checking)
+        
+        guard ShimManager.shared.shimFound else {
+            updateStatus(for: "shimUpdate", status: .warning("Cannot check for updates — codex-shim binary not found."))
+            return
+        }
+        
+        let updater = ShimManager.shared.updater
+        await updater.checkForUpdate(shimPath: ShimManager.shared.shimPath)
+        
+        if updater.updateAvailable {
+            let local = updater.localCommitHash ?? "unknown"
+            let remote = updater.remoteCommitHash ?? "unknown"
+            updateStatus(for: "shimUpdate", status: .warning("Update available: \(local) → \(remote). Use the menu bar or Settings to update."))
+        } else if updater.lastUpdateError != nil {
+            updateStatus(for: "shimUpdate", status: .warning("Could not check for updates: \(updater.lastUpdateError!)"))
+        } else {
+            updateStatus(for: "shimUpdate", status: .success)
+        }
     }
 }

@@ -35,6 +35,7 @@
 		BD69AC32E96B1264E4B5A712 /* ShimMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB795178DED988F5103FA78 /* ShimMenuView.swift */; };
 		C1A09C6A6617CBB646212A16 /* ProviderSetupWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1FE36D6BBF73AF5F232130 /* ProviderSetupWizard.swift */; };
 		C8C7A668D40A63D3C0468DB8 /* KeychainManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A17E94226B9C40783BD3FBA /* KeychainManagerTests.swift */; };
+		F76D2841A9FA1DCB2371094A /* ShimUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 351CD83E0089BDD4E170EDDA /* ShimUpdater.swift */; };
 		FAD463AD2896B15863C85B5A /* ApiKeyValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E72FA82D4FD1543797F9594 /* ApiKeyValidatorTests.swift */; };
 		FC3DE6A8FC326FF96EE5A50C /* ModelsJsonManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75820BB7C35F43FF8757AA30 /* ModelsJsonManager.swift */; };
 /* End PBXBuildFile section */
@@ -61,6 +62,7 @@
 		27DB01BA850457CD3C54A6A1 /* AdvancedSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsTab.swift; sourceTree = "<group>"; };
 		27FCAACD5E67AB0D918C6221 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2CACB73368A84C5CB3C5D58E /* Shimbar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shimbar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		351CD83E0089BDD4E170EDDA /* ShimUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimUpdater.swift; sourceTree = "<group>"; };
 		39982D0809BA72CF0FCA5063 /* ShimStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimStatus.swift; sourceTree = "<group>"; };
 		3BEB3534948DB0F4C10BE0E8 /* Shimbar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Shimbar.entitlements; sourceTree = "<group>"; };
 		42D4E81616FAF06B722CD4D4 /* ModelsSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsSettingsTab.swift; sourceTree = "<group>"; };
@@ -160,6 +162,7 @@
 				3BEB3534948DB0F4C10BE0E8 /* Shimbar.entitlements */,
 				AECB1D8213B22B0E3A1E9665 /* ShimbarApp.swift */,
 				545FF169AB727B29D43C3B10 /* ShimManager.swift */,
+				351CD83E0089BDD4E170EDDA /* ShimUpdater.swift */,
 				056AA117861EE64F2CEBAB72 /* StartupValidator.swift */,
 				66091D8B3E04649647B9EF52 /* Models */,
 				6F140DEA4A49D52A5AD6838E /* Views */,
@@ -287,6 +290,7 @@
 				1A0C1D35CC8A5656C091F2AF /* ShimModel.swift in Sources */,
 				09CF6681DB3BD63CCA9B73DF /* ShimStatus.swift in Sources */,
 				55BEAEE688CAA40835D7BF5C /* ShimStatusIcon.swift in Sources */,
+				F76D2841A9FA1DCB2371094A /* ShimUpdater.swift in Sources */,
 				B1585733304D2AE013808D8F /* ShimbarApp.swift in Sources */,
 				4285E5473F5ED034B6902FF8 /* StartupValidator.swift in Sources */,
 			);

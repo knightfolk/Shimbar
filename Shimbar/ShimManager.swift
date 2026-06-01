@@ -70,6 +70,9 @@ final class ShimManager {
     /// Persistent user settings (polling interval, port, etc.).
     let settings = AppSettings.shared
 
+    /// Manages checking for and applying codex-shim updates from upstream.
+    let updater = ShimUpdater.shared
+
     // MARK: - Private State
 
     /// Timer used for periodic status polling.
@@ -132,6 +135,11 @@ final class ShimManager {
 
         // 3. Initial status refresh
         await refreshStatus()
+
+        // 4. Check for codex-shim updates from upstream
+        if shimFound {
+            await updater.checkForUpdate(shimPath: shimPath)
+        }
     }
 
     /// Re-runs binary discovery and updates the shim path.

@@ -28,6 +28,7 @@ A native macOS menu bar utility for the `codex-shim` local proxy daemon. **Shimb
 - **On-the-fly Model Switching**: Change your active AI model directly from the menu bar with immediate `models.json` updates and background daemon reload.
 - **Diagnostics log stream**: Monospaced diagnostics scroll pane displaying live updates from your `shim.log` file.
 - **Electron Application Patching**: Easily patch and restore Codex Desktop to route its traffic through Shimbar's local port.
+- **Automatic `codex-shim` Upgrades**: Background checking of the upstream repository for updates with one-click, in-app installation. It features intelligent rebase merging to preserve local edits, native `uv tool` upgrade support, and sandboxed/elevated ownership chown resolution.
 - **Launch at Login**: Integrates with ServiceManagement to run automatically at macOS startup.
 
 ---
