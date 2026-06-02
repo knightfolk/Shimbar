@@ -530,6 +530,13 @@ struct ShimMenuView: View {
             )
 
             MenuRow(
+                title: "Sync to Zencoder",
+                icon: "wand.and.stars",
+                helpText: "Push all configured custom models to Zencoder's settings.json.",
+                action: { ZencoderSettingsManager.shared.syncFromShimbar(forceAll: true) }
+            )
+
+            MenuRow(
                 title: "View Log",
                 icon: "doc.text",
                 helpText: "Open the real-time background log file in your system's default editor for diagnostics.",
@@ -595,12 +602,15 @@ struct ShimMenuView: View {
     private var creditSection: some View {
         HStack {
             Spacer()
+            Text("Powered by")
+                .font(.system(size: 9))
+                .foregroundStyle(.tertiary)
             Button(action: {
                 if let url = URL(string: "https://github.com/0xSero/codex-shim") {
                     NSWorkspace.shared.open(url)
                 }
             }) {
-                Text("0xSero (codex-shim)")
+                Text("codex-shim")
                     .font(.system(size: 9))
                     .foregroundStyle(.secondary)
                     .underline()

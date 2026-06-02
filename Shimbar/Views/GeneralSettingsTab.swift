@@ -366,7 +366,7 @@ struct GeneralSettingsTab: View {
     }
     
     private func savePort() {
-        if let val = Int(portString), val > 0 && val < 65536 {
+        if let val = Int(portString), val > 0 && val <= 65535 {
             AppSettings.shared.port = val
             Task {
                 try? await manager.restart()

@@ -73,7 +73,7 @@ final class ShimUpdater {
     ///
     /// - Parameter shimPath: The filesystem path to the codex-shim binary.
     /// - Returns: The path to the repository root, or `nil` if not found.
-    private func resolveRepoPath(from shimPath: String) -> String? {
+    func resolveRepoPath(from shimPath: String) -> String? {
         let fm = FileManager.default
         var current = URL(fileURLWithPath: shimPath).deletingLastPathComponent()
 
@@ -157,7 +157,26 @@ final class ShimUpdater {
             remoteCommitHash = String(remoteFullHash.prefix(7))
 
             // 4. Compare
-            updateAvailable = fullHash != remoteFullHash && !remoteFullHash.isEmpty
+            var update = false
+            if !remoteFullHash.isEmpty && fullHash != remoteFullHash {
+                // Check if the remote commit is already an ancestor of our local HEAD.
+                // If it is, we don't need to update (local is ahead of remote).
+                // First verify the remote commit object exists in our local repository.
+                let objectExists = try? await ProcessRunner.run(
+                    "/usr/bin/git",
+                    arguments: ["-C", repo, "cat-file", "-e", remoteFullHash]
+                )
+                if let exists = objectExists?.succeeded, exists {
+                    let isAncestor = try? await ProcessRunner.run(
+                        "/usr/bin/git",
+                        arguments: ["-C", repo, "merge-base", "--is-ancestor", remoteFullHash, "HEAD"]
+                    )
+                    update = !(isAncestor?.succeeded ?? false)
+                } else {
+                    update = true
+                }
+            }
+            updateAvailable = update
             lastCheckDate = Date()
 
         } catch {

@@ -7,7 +7,7 @@ import SwiftUI
 ///
 /// Used throughout the UI to display connection state and control
 /// visual indicators (icon color, status text) in the menu bar.
-enum ShimStatus: Equatable {
+enum ShimStatus: Equatable, Hashable {
     /// The shim daemon is running and responding normally.
     case running
     /// The shim daemon is not running.

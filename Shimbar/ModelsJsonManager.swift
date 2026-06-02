@@ -13,9 +13,9 @@ class ModelsJsonManager {
     let modelsJsonURL: URL
     var models: [ShimModel] = []
     
-    private init() {
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        self.modelsJsonURL = home.appendingPathComponent(".codex-shim/models.json")
+    init(modelsJsonURL: URL? = nil) {
+        let url = modelsJsonURL ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".codex-shim/models.json")
+        self.modelsJsonURL = url
         try? ensureDirectoryExists()
     }
     
@@ -103,6 +103,8 @@ class ModelsJsonManager {
         }
         
         try data.write(to: modelsJsonURL, options: .atomic)
+        
+        try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: modelsJsonURL.path)
     }
     
     /// Adds one or more selected models for a given provider, merging with the existing models list.

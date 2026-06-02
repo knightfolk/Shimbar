@@ -169,14 +169,18 @@ actor ProcessRunner {
     /// This will trigger the standard macOS Touch ID / Password authentication dialog.
     static func runElevated(_ command: String, arguments: [String] = []) async throws -> ProcessResult {
         let escapedArgs = arguments.map { arg in
-            let escaped = arg.replacingOccurrences(of: "'", with: "'\\''")
+            let escaped = arg
+                .replacingOccurrences(of: "\\", with: "\\\\")
+                .replacingOccurrences(of: "'", with: "'\\''")
             return "'\(escaped)'"
         }.joined(separator: " ")
         
         let fullCmd = "\(command) \(escapedArgs)"
         
-        // Escape the command for AppleScript string
-        let appleScriptCmd = "do shell script \"\(fullCmd.replacingOccurrences(of: "\"", with: "\\\""))\" with administrator privileges"
+        let appleScriptSafe = fullCmd
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+        let appleScriptCmd = "do shell script \"\(appleScriptSafe)\" with administrator privileges"
         
         let process = Process()
         let stdoutPipe = Pipe()

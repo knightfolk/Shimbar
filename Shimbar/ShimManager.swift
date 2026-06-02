@@ -67,6 +67,9 @@ final class ShimManager {
     /// Manages the on-disk `models.json` file.
     let modelsManager = ModelsJsonManager.shared
 
+    /// Manages syncing models to Zencoder's settings.json file.
+    let zencoderManager = ZencoderSettingsManager.shared
+
     /// Persistent user settings (polling interval, port, etc.).
     let settings = AppSettings.shared
 
@@ -327,7 +330,6 @@ final class ShimManager {
             let modDate = attributes[.modificationDate] as? Date
             let size = attributes[.size] as? UInt64
 
-            // If attributes haven't changed since last check, return cached value
             if let lastMod = lastCheckedAsarModDate,
                let lastSize = lastCheckedAsarSize,
                lastMod == modDate,
@@ -335,29 +337,54 @@ final class ShimManager {
                 return
             }
 
-            // Update modification attributes
             lastCheckedAsarModDate = modDate
             lastCheckedAsarSize = size
 
-            // Read app.asar. Since it's large (159MB), we do this using safe options.
-            let url = URL(fileURLWithPath: appAsarPath)
-            let data = try Data(contentsOf: url, options: .mappedIfSafe)
-            
-            // Search for the signature comment "codex-shim-patched" or the legacy replacement "let u=!1,d;"
-            if let signature = "codex-shim-patched".data(using: .utf8),
-               data.range(of: signature) != nil {
-                isCodexPatched = true
-            } else if let legacyReplacement = "let u=!1,d;".data(using: .utf8),
-                      data.range(of: legacyReplacement) != nil {
-                isCodexPatched = true
-            } else {
-                isCodexPatched = false
-            }
+            isCodexPatched = searchFile(atPath: appAsarPath, for: [
+                "codex-shim-patched".data(using: .utf8)!,
+                "let u=!1,d;".data(using: .utf8)!
+            ])
         } catch {
             isCodexPatched = false
             lastCheckedAsarModDate = nil
             lastCheckedAsarSize = nil
         }
+    }
+
+    private func searchFile(atPath path: String, for needles: [Data]) -> Bool {
+        guard let handle = try? FileHandle(forReadingFrom: URL(fileURLWithPath: path)) else {
+            return false
+        }
+        defer { try? handle.close() }
+
+        let chunkSize = 1024 * 1024
+        let maxOverlap = needles.map(\.count).max() ?? 0
+        var buffer = Data()
+
+        while true {
+            let chunk = try? handle.read(upToCount: chunkSize)
+            guard let chunk, !chunk.isEmpty else { break }
+
+            buffer.append(chunk)
+
+            for needle in needles {
+                if buffer.range(of: needle) != nil {
+                    return true
+                }
+            }
+
+            if buffer.count > maxOverlap {
+                buffer = Data(buffer.suffix(maxOverlap))
+            }
+        }
+
+        for needle in needles {
+            if buffer.range(of: needle) != nil {
+                return true
+            }
+        }
+
+        return false
     }
 
     /// Query the shim process for its current status.
@@ -700,9 +727,17 @@ final class ShimManager {
         }
 
         do {
-            let content = try String(contentsOf: logURL, encoding: .utf8)
+            let handle = try FileHandle(forReadingFrom: logURL)
+            let fileSize = try handle.seekToEnd()
+            let readSize = min(fileSize, 8192)
+            try handle.seek(toOffset: fileSize - readSize)
+            let data = try handle.readToEnd() ?? Data()
+            try? handle.close()
+
+            let content = String(data: data, encoding: .utf8) ?? ""
             let allLines = content.components(separatedBy: .newlines)
-            lastLogLines = Array(allLines.suffix(50))
+            let tail = Array(allLines.suffix(50))
+            lastLogLines = tail.isEmpty ? ["(empty log)"] : tail
         } catch {
             lastLogLines = ["(Failed to read shim.log: \(error.localizedDescription))"]
         }
@@ -805,14 +840,15 @@ final class ShimManager {
             return
         }
 
-        // 2. Determine running state with robust string keyword matching
-        if lowered.contains("running") || lowered.contains("active") || lowered.contains("started") || lowered.contains("online") {
-            status = .running
-            isEnabled = true
-        } else if lowered.contains("stopped") || lowered.contains("not running") || lowered.contains("offline") || lowered.contains("inactive") {
+        // 2. Determine running state — check negative patterns FIRST to avoid
+        //    "not running" (which contains "running") matching the positive case.
+        if lowered.contains("not running") || lowered.contains("stopped") || lowered.contains("offline") || lowered.contains("inactive") {
             status = .stopped
             isEnabled = false
             activeModel = nil
+        } else if lowered.contains("running") || lowered.contains("active") || lowered.contains("started") || lowered.contains("online") {
+            status = .running
+            isEnabled = true
         } else {
             // Fallback: if exit code is 0 but keywords are absent, assume running if stdout is present
             if !output.isEmpty {

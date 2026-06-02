@@ -152,7 +152,7 @@ struct ApiKeyValidator: Sendable {
     // MARK: - Response Parsing
 
     /// Extracts model ID strings from a typical `{ "data": [ { "id": "..." }, ... ] }` response.
-    private static func parseModelIds(from data: Data) -> [String] {
+    static func parseModelIds(from data: Data) -> [String] {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return []
         }
@@ -176,7 +176,7 @@ struct ApiKeyValidator: Sendable {
     }
 
     /// Attempts to extract a human-readable error message from the response body.
-    private static func parseErrorMessage(from data: Data) -> String? {
+    static func parseErrorMessage(from data: Data) -> String? {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return nil
         }
