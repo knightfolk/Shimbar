@@ -27,6 +27,7 @@ class AppSettings {
         static let disableChatGPTPassthrough = "shimbar.disableChatGPTPassthrough"
         static let lastActiveModel = "shimbar.lastActiveModel"
         static let collapseModelSection = "shimbar.collapseModelSection"
+        static let settingsPath = "shimbar.settingsPath"
     }
 
     // MARK: - Defaults
@@ -79,6 +80,12 @@ class AppSettings {
         didSet { defaults.set(collapseModelSection, forKey: Keys.collapseModelSection) }
     }
 
+    /// Optional custom path to the codex-shim config file. When set, `--settings <path>`
+    /// is passed to all shim CLI invocations. Defaults to `nil` (uses shim default).
+    var settingsPath: String? {
+        didSet { defaults.set(settingsPath, forKey: Keys.settingsPath) }
+    }
+
     // MARK: - Initialization
 
     /// Creates an `AppSettings` instance backed by the given
@@ -108,5 +115,6 @@ class AppSettings {
         self.disableChatGPTPassthrough = defaults.bool(forKey: Keys.disableChatGPTPassthrough)
         self.lastActiveModel = defaults.string(forKey: Keys.lastActiveModel)
         self.collapseModelSection = defaults.bool(forKey: Keys.collapseModelSection)
+        self.settingsPath = defaults.string(forKey: Keys.settingsPath)
     }
 }

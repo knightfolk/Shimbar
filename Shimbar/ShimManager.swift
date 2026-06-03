@@ -44,6 +44,15 @@ final class ShimManager {
     /// Whether ChatGPT passthrough mode is available.
     var chatGPTPassthroughAvailable: Bool = false
 
+    /// Whether Cursor/Composer passthrough mode is available.
+    var cursorPassthroughAvailable: Bool = false
+
+    /// Whether the Auto Router is configured and active.
+    var autoRouterEnabled: Bool = false
+
+    /// Live model list fetched from `/v1/models`, reflecting what the running shim actually serves.
+    var liveModels: [LiveModel] = []
+
     /// Resolved filesystem path to the `codex-shim` binary.
     var shimPath: String = ""
 
@@ -61,6 +70,12 @@ final class ShimManager {
 
     /// Human-readable description of the last error, if any.
     var lastError: String?
+
+    /// Output lines from a running CLI task (codex-shim codex --).
+    var cliTaskOutput: [String] = []
+
+    /// Whether a CLI task is currently running.
+    var isCliTaskRunning: Bool = false
 
     // MARK: - Sub-Managers
 
@@ -387,25 +402,84 @@ final class ShimManager {
         return false
     }
 
-    /// Query the shim process for its current status.
+    /// Query the shim process for its current status via the `/health` HTTP API.
     ///
-    /// Parses the text output of `codex-shim status` looking for keywords
-    /// such as *running* or *stopped*, and extracts the active model count.
+    /// Sends a GET request to `http://127.0.0.1:{port}/health` and parses the
+    /// structured JSON response `{ok, models, chatgpt_passthrough, cursor_passthrough, auto_router}`.
+    /// Falls back to `.stopped` when the shim is unreachable.
     func refreshStatus() async {
         await checkCodexPatchedStatus()
-        await loadLogTail() // Load logs automatically on status ticks to share polling timer resource
+        await loadLogTail()
+
+        let url = URL(string: "http://127.0.0.1:\(settings.port)/health")!
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 3
+        request.httpMethod = "GET"
+
         do {
-            let result = try await ProcessRunner.runShim(
-                "status",
-                shimPath: settings.shimPath,
-                port: settings.port
-            )
-            parseStatusOutput(result.stdout, exitCode: result.exitCode)
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                applyStoppedState()
+                return
+            }
+
+            let health = try JSONDecoder().decode(HealthResponse.self, from: data)
+
+            if health.ok {
+                status = .running
+                isEnabled = true
+            } else {
+                status = .stopped
+                isEnabled = false
+                activeModel = nil
+            }
+
+            chatGPTPassthroughAvailable = health.chatgptPassthrough
+            cursorPassthroughAvailable = health.cursorPassthrough
+            autoRouterEnabled = health.autoRouter
+
+            await fetchLiveModels()
         } catch {
-            // If the command itself fails, the shim is almost certainly not running.
-            status = .stopped
-            isEnabled = false
-            activeModel = nil
+            applyStoppedState()
+        }
+    }
+
+    private func applyStoppedState() {
+        status = .stopped
+        isEnabled = false
+        activeModel = nil
+        chatGPTPassthroughAvailable = false
+        cursorPassthroughAvailable = false
+        autoRouterEnabled = false
+    }
+
+    /// Fetch the live model list from the running shim's `/v1/models` endpoint.
+    ///
+    /// Returns the OpenAI-compatible `{object: "list", data: [{id, object, created, owned_by}]}` response.
+    /// Stores the result in `liveModels` for use by UI views and other manager methods.
+    func fetchLiveModels() async {
+        guard status == .running else {
+            liveModels = []
+            return
+        }
+
+        let url = URL(string: "http://127.0.0.1:\(settings.port)/v1/models")!
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 3
+        request.httpMethod = "GET"
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                liveModels = []
+                return
+            }
+            let result = try JSONDecoder().decode(LiveModelsResponse.self, from: data)
+            liveModels = result.data
+        } catch {
+            liveModels = []
         }
     }
 
@@ -419,7 +493,8 @@ final class ShimManager {
             _ = try await ProcessRunner.runShim(
                 "generate",
                 shimPath: settings.shimPath,
-                port: settings.port
+                port: settings.port,
+                settingsPath: settings.settingsPath
             )
         } catch {
             lastError = "Generate failed: \(error.localizedDescription)"
@@ -437,7 +512,8 @@ final class ShimManager {
             _ = try await ProcessRunner.runShim(
                 "start",
                 shimPath: settings.shimPath,
-                port: settings.port
+                port: settings.port,
+                settingsPath: settings.settingsPath
             )
             await refreshStatus()
         } catch {
@@ -456,7 +532,8 @@ final class ShimManager {
             _ = try await ProcessRunner.runShim(
                 "stop",
                 shimPath: settings.shimPath,
-                port: settings.port
+                port: settings.port,
+                settingsPath: settings.settingsPath
             )
             await refreshStatus()
         } catch {
@@ -481,7 +558,8 @@ final class ShimManager {
             let result = try await ProcessRunner.runShim(
                 "enable",
                 shimPath: settings.shimPath,
-                port: settings.port
+                port: settings.port,
+                settingsPath: settings.settingsPath
             )
             if !result.succeeded {
                 let detail = result.stderr.isEmpty ? result.stdout : result.stderr
@@ -507,7 +585,8 @@ final class ShimManager {
             let result = try await ProcessRunner.runShim(
                 "disable",
                 shimPath: settings.shimPath,
-                port: settings.port
+                port: settings.port,
+                settingsPath: settings.settingsPath
             )
             if !result.succeeded {
                 let detail = result.stderr.isEmpty ? result.stdout : result.stderr
@@ -533,7 +612,8 @@ final class ShimManager {
             _ = try await ProcessRunner.runShim(
                 "restart",
                 shimPath: settings.shimPath,
-                port: settings.port
+                port: settings.port,
+                settingsPath: settings.settingsPath
             )
             await refreshStatus()
         } catch {
@@ -557,7 +637,8 @@ final class ShimManager {
                 "model",
                 arguments: ["use", slug],
                 shimPath: settings.shimPath,
-                port: settings.port
+                port: settings.port,
+                settingsPath: settings.settingsPath
             )
             activeModel = slug
             try await generate()
@@ -592,7 +673,8 @@ final class ShimManager {
                 result = try await ProcessRunner.runShim(
                     "patch-app",
                     shimPath: settings.shimPath,
-                    port: settings.port
+                    port: settings.port,
+                    settingsPath: settings.settingsPath
                 )
             }
             // If the CLI itself reported a clear failure before writing the patch, surface it.
@@ -640,7 +722,8 @@ final class ShimManager {
                 _ = try await ProcessRunner.runShim(
                     "restore-app",
                     shimPath: settings.shimPath,
-                    port: settings.port
+                    port: settings.port,
+                    settingsPath: settings.settingsPath
                 )
             }
         } catch {
@@ -677,12 +760,14 @@ final class ShimManager {
         // 2. Fallback: run codex-shim app in the background so it doesn't block the UI thread
         let path = settings.shimPath
         let port = settings.port
+        let settingsPth = settings.settingsPath
         Task.detached(priority: .background) {
             _ = try? await ProcessRunner.runShim(
                 "app",
                 arguments: ["."],
                 shimPath: path,
-                port: port
+                port: port,
+                settingsPath: settingsPth
             )
         }
     }
@@ -716,6 +801,40 @@ final class ShimManager {
     /// Open the shim log file (`shim.log`) in the user's default editor.
     func openShimLog() {
         NSWorkspace.shared.open(resolvedLogURL)
+    }
+
+    /// Run a one-off Codex CLI task via `codex-shim codex -- <args>`.
+    ///
+    /// Streams output line-by-line into `cliTaskOutput`.
+    func runCodexTask(prompt: String) async {
+        isCliTaskRunning = true
+        cliTaskOutput = []
+        lastError = nil
+        defer { isCliTaskRunning = false }
+
+        do {
+            let result = try await ProcessRunner.runShim(
+                "codex",
+                arguments: ["--", prompt],
+                shimPath: settings.shimPath,
+                port: settings.port,
+                settingsPath: settings.settingsPath
+            )
+
+            let lines = result.stdout
+                .components(separatedBy: .newlines)
+                .filter { !$0.isEmpty }
+            cliTaskOutput = lines
+
+            if !result.succeeded {
+                let errLines = result.stderr.components(separatedBy: .newlines).filter { !$0.isEmpty }
+                cliTaskOutput.append(contentsOf: errLines)
+                lastError = "CLI task exited with code \(result.exitCode)"
+            }
+        } catch {
+            lastError = "CLI task failed: \(error.localizedDescription)"
+            cliTaskOutput = [lastError!]
+        }
     }
 
     /// Load the last 50 lines of `shim.log` into ``lastLogLines``.
@@ -821,56 +940,4 @@ final class ShimManager {
 
     // MARK: - Private Helpers
 
-    /// Parse the text output from `codex-shim status` and update published state.
-    ///
-    /// Expected output patterns:
-    /// - "Status: running" / "Status: stopped"
-    /// - "Active model: gpt-4o"
-    /// - "Models: 5"
-    /// - "Enabled: true/false"
-    /// Parse the text output and exit code from `codex-shim status` and update published state.
-    private func parseStatusOutput(_ output: String, exitCode: Int32) {
-        let lowered = output.lowercased()
-
-        // 1. If command reported non-zero status exit code, it's typically stopped or not configured.
-        if exitCode != 0 {
-            status = .stopped
-            isEnabled = false
-            activeModel = nil
-            return
-        }
-
-        // 2. Determine running state — check negative patterns FIRST to avoid
-        //    "not running" (which contains "running") matching the positive case.
-        if lowered.contains("not running") || lowered.contains("stopped") || lowered.contains("offline") || lowered.contains("inactive") {
-            status = .stopped
-            isEnabled = false
-            activeModel = nil
-        } else if lowered.contains("running") || lowered.contains("active") || lowered.contains("started") || lowered.contains("online") {
-            status = .running
-            isEnabled = true
-        } else {
-            // Fallback: if exit code is 0 but keywords are absent, assume running if stdout is present
-            if !output.isEmpty {
-                status = .running
-                isEnabled = true
-            } else {
-                status = .unknown
-                isEnabled = false
-            }
-        }
-
-        // Extract active model
-        if let modelLine = output.components(separatedBy: .newlines)
-            .first(where: { $0.lowercased().hasPrefix("active model") }) {
-            let parts = modelLine.split(separator: ":", maxSplits: 1)
-            if parts.count == 2 {
-                let model = parts[1].trimmingCharacters(in: .whitespaces)
-                activeModel = model.isEmpty ? nil : model
-            }
-        }
-
-        // Check ChatGPT passthrough availability
-        chatGPTPassthroughAvailable = lowered.contains("passthrough")
-    }
 }

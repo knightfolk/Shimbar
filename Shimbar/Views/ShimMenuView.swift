@@ -446,7 +446,37 @@ struct ShimMenuView: View {
                     .font(.system(size: 10))
                     .foregroundStyle(.tertiary)
                     .help(manager.isCodexPatched ? "Model selection is managed inside the patched Codex Desktop app picker." : "Lists configured models. Swap models here or roll this section up if you use the Codex dropdown patch.")
-                
+
+                if manager.autoRouterEnabled {
+                    Spacer()
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.triangle.branch")
+                            .font(.system(size: 9))
+                        Text("Router")
+                            .font(.system(size: 9, weight: .semibold))
+                    }
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(.orange.opacity(0.15)))
+                }
+
+                if manager.cursorPassthroughAvailable {
+                    if !manager.autoRouterEnabled {
+                        Spacer()
+                    }
+                    HStack(spacing: 4) {
+                        Image(systemName: "cursorarrow.and.square.3d")
+                            .font(.system(size: 9))
+                        Text("Composer")
+                            .font(.system(size: 9, weight: .semibold))
+                    }
+                    .foregroundStyle(.purple)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(.purple.opacity(0.15)))
+                }
+
                 if manager.isCodexPatched {
                     Spacer()
                     
@@ -494,12 +524,59 @@ struct ShimMenuView: View {
                         .padding(.vertical, 8)
                 } else {
                     VStack(spacing: 0) {
+                        if manager.autoRouterEnabled, let router = manager.modelsManager.routerConfig {
+                            ModelListRow(
+                                model: ShimModel(
+                                    slug: router.slug,
+                                    model: router.slug,
+                                    displayName: router.displayName,
+                                    provider: "codex-shim-auto",
+                                    baseUrl: ""
+                                ),
+                                isActive: manager.activeModel == router.slug,
+                                onSelect: { Task { try? await manager.switchModel(router.slug) } }
+                            )
+                        }
                         ForEach(manager.models, id: \.slug) { model in
                             ModelListRow(
                                 model: model,
                                 isActive: manager.activeModel == model.slug,
                                 onSelect: { Task { try? await manager.switchModel(model.slug) } }
                             )
+                        }
+
+                        let chatGPTModels = manager.liveModels.filter { $0.isChatGPTPassthrough }
+                        if !chatGPTModels.isEmpty && !manager.settings.disableChatGPTPassthrough {
+                            ForEach(chatGPTModels) { lm in
+                                ModelListRow(
+                                    model: ShimModel(
+                                        slug: lm.id,
+                                        model: lm.id,
+                                        displayName: "\(lm.id) (ChatGPT)",
+                                        provider: "chatgpt",
+                                        baseUrl: ""
+                                    ),
+                                    isActive: manager.activeModel == lm.id,
+                                    onSelect: { Task { try? await manager.switchModel(lm.id) } }
+                                )
+                            }
+                        }
+
+                        let cursorModels = manager.liveModels.filter { $0.isCursorPassthrough }
+                        if !cursorModels.isEmpty {
+                            ForEach(cursorModels) { lm in
+                                ModelListRow(
+                                    model: ShimModel(
+                                        slug: lm.id,
+                                        model: lm.id,
+                                        displayName: "\(lm.id) (Cursor)",
+                                        provider: "cursor",
+                                        baseUrl: ""
+                                    ),
+                                    isActive: manager.activeModel == lm.id,
+                                    onSelect: { Task { try? await manager.switchModel(lm.id) } }
+                                )
+                            }
                         }
                     }
                 }

@@ -155,9 +155,14 @@ actor ProcessRunner {
         _ subcommand: String,
         arguments: [String] = [],
         shimPath: String = "codex-shim",
-        port: Int = 8765
+        port: Int = 8765,
+        settingsPath: String? = nil
     ) async throws -> ProcessResult {
-        var args = ["--port", "\(port)", subcommand]
+        var args = ["--port", "\(port)"]
+        if let settingsPath, !settingsPath.isEmpty {
+            args += ["--settings", settingsPath]
+        }
+        args.append(subcommand)
         args.append(contentsOf: arguments)
         return try await run(shimPath, arguments: args)
     }

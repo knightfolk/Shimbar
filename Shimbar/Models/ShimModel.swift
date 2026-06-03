@@ -143,8 +143,50 @@ struct ShimModel: Identifiable, Codable, Hashable {
 
 // MARK: - ModelsFile
 
+/// A candidate model entry in the router configuration.
+struct RouterCandidate: Codable, Hashable, Identifiable {
+    var id: String { slug }
+
+    var slug: String
+    var cost: Double
+    var supportsImages: Bool
+    var card: String
+
+    enum CodingKeys: String, CodingKey {
+        case slug
+        case cost
+        case supportsImages = "supports_images"
+        case card
+    }
+}
+
+/// The router configuration block in `models.json`.
+struct RouterConfig: Codable, Hashable {
+    var enabled: Bool
+    var slug: String
+    var displayName: String
+    var classifier: String
+    var threshold: Double
+    var defaultModel: String
+    var cache: Bool
+    var candidates: [RouterCandidate]
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case slug
+        case displayName = "display_name"
+        case classifier
+        case threshold
+        case defaultModel = "default"
+        case cache
+        case candidates
+    }
+}
+
 /// Top-level structure of the codex-shim `models.json` configuration file.
 struct ModelsFile: Codable {
     /// The array of configured shim models.
     var models: [ShimModel]
+    /// Optional Auto Router configuration.
+    var router: RouterConfig?
 }

@@ -114,4 +114,92 @@ final class ModelsJsonManagerCRUDTests: XCTestCase {
         try nestedManager.load()
         XCTAssertTrue(nestedManager.models.isEmpty)
     }
+
+    func testRouterConfigNilWhenAbsent() throws {
+        try "{\"models\":[]}".write(to: manager.modelsJsonURL, atomically: true, encoding: .utf8)
+        try manager.load()
+        XCTAssertNil(manager.routerConfig)
+    }
+
+    func testRouterConfigLoadedFromDisk() throws {
+        let json = """
+        {
+            "models": [],
+            "router": {
+                "enabled": true,
+                "slug": "codex-auto",
+                "display_name": "Auto",
+                "classifier": "cheap",
+                "threshold": 0.7,
+                "default": "fallback",
+                "cache": true,
+                "candidates": [
+                    {"slug": "a", "cost": 0.3, "supports_images": true, "card": "fast"}
+                ]
+            }
+        }
+        """
+        try json.write(to: manager.modelsJsonURL, atomically: true, encoding: .utf8)
+        try manager.load()
+
+        XCTAssertNotNil(manager.routerConfig)
+        XCTAssertTrue(manager.routerConfig!.enabled)
+        XCTAssertEqual(manager.routerConfig!.slug, "codex-auto")
+        XCTAssertEqual(manager.routerConfig!.candidates.count, 1)
+        XCTAssertEqual(manager.routerConfig!.candidates[0].slug, "a")
+    }
+
+    func testRouterConfigSaveAndReload() throws {
+        manager.models = [
+            ShimModel(slug: "test", model: "test", displayName: "Test", provider: "openai", baseUrl: "https://api.test.com")
+        ]
+        manager.routerConfig = RouterConfig(
+            enabled: false,
+            slug: "codex-auto",
+            displayName: "Auto",
+            classifier: "cheap",
+            threshold: 0.5,
+            defaultModel: "test",
+            cache: false,
+            candidates: [
+                RouterCandidate(slug: "test", cost: 1.0, supportsImages: false, card: "default")
+            ]
+        )
+        try manager.save()
+
+        let reloaded = ModelsJsonManager(modelsJsonURL: manager.modelsJsonURL)
+        try reloaded.load()
+
+        XCTAssertEqual(reloaded.models.count, 1)
+        XCTAssertNotNil(reloaded.routerConfig)
+        XCTAssertEqual(reloaded.routerConfig!.slug, "codex-auto")
+        XCTAssertFalse(reloaded.routerConfig!.enabled)
+        XCTAssertEqual(reloaded.routerConfig!.candidates.count, 1)
+    }
+
+    func testRouterConfigPreservedWhenModelsUpdated() throws {
+        manager.models = []
+        manager.routerConfig = RouterConfig(
+            enabled: true,
+            slug: "codex-auto",
+            displayName: "Auto",
+            classifier: "x",
+            threshold: 0.7,
+            defaultModel: "y",
+            cache: true,
+            candidates: []
+        )
+        try manager.save()
+
+        manager.models = [ShimModel(slug: "new", model: "new", displayName: "New", provider: "openai", baseUrl: "")]
+        try manager.save()
+
+        let reloaded = ModelsJsonManager(modelsJsonURL: manager.modelsJsonURL)
+        try reloaded.load()
+
+        XCTAssertEqual(reloaded.models.count, 1)
+        XCTAssertEqual(reloaded.models[0].slug, "new")
+        XCTAssertNotNil(reloaded.routerConfig)
+        XCTAssertTrue(reloaded.routerConfig!.enabled)
+    }
 }

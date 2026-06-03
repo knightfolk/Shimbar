@@ -12,6 +12,7 @@ class ModelsJsonManager {
     
     let modelsJsonURL: URL
     var models: [ShimModel] = []
+    var routerConfig: RouterConfig?
     
     init(modelsJsonURL: URL? = nil) {
         let url = modelsJsonURL ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".codex-shim/models.json")
@@ -48,6 +49,7 @@ class ModelsJsonManager {
         do {
             let decodedFile = try decoder.decode(ModelsFile.self, from: data)
             self.models = decodedFile.models
+            self.routerConfig = decodedFile.router
             
             // Decrypt keys from Keychain for models that don't have them in JSON but do have a provider
             var didDecryptAny = false
@@ -88,7 +90,7 @@ class ModelsJsonManager {
             modelsToSave.append(modelCopy)
         }
         
-        let fileObj = ModelsFile(models: modelsToSave)
+        let fileObj = ModelsFile(models: modelsToSave, router: routerConfig)
         
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

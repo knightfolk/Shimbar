@@ -67,3 +67,56 @@ enum ShimStatus: Equatable, Hashable {
         }
     }
 }
+
+// MARK: - HealthResponse
+
+struct HealthResponse: Codable {
+    let ok: Bool
+    let models: Int
+    let chatgptPassthrough: Bool
+    let cursorPassthrough: Bool
+    let autoRouter: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case ok
+        case models
+        case chatgptPassthrough = "chatgpt_passthrough"
+        case cursorPassthrough = "cursor_passthrough"
+        case autoRouter = "auto_router"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.ok = try container.decode(Bool.self, forKey: .ok)
+        self.models = try container.decode(Int.self, forKey: .models)
+        self.chatgptPassthrough = try container.decodeIfPresent(Bool.self, forKey: .chatgptPassthrough) ?? false
+        self.cursorPassthrough = try container.decodeIfPresent(Bool.self, forKey: .cursorPassthrough) ?? false
+        self.autoRouter = try container.decodeIfPresent(Bool.self, forKey: .autoRouter) ?? false
+    }
+}
+
+// MARK: - LiveModel
+
+struct LiveModel: Identifiable, Codable, Hashable {
+    let id: String
+    let object: String
+    let created: Int
+    let ownedBy: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case object
+        case created
+        case ownedBy = "owned_by"
+    }
+
+    var isChatGPTPassthrough: Bool { ownedBy == "chatgpt" }
+    var isCursorPassthrough: Bool { ownedBy == "cursor" }
+    var isRouter: Bool { ownedBy == "codex-shim-auto" }
+    var isBYOK: Bool { ownedBy == "codex-shim" }
+}
+
+struct LiveModelsResponse: Codable {
+    let object: String
+    let data: [LiveModel]
+}

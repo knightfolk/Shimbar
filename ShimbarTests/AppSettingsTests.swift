@@ -101,4 +101,30 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(reloaded.lastActiveModel, "claude-sonnet-4")
         XCTAssertTrue(reloaded.collapseModelSection)
     }
+
+    func testSettingsPathDefaultIsNil() {
+        let settings = AppSettings(defaults: testDefaults)
+        XCTAssertNil(settings.settingsPath)
+    }
+
+    func testSettingsPathPersistence() {
+        let settings = AppSettings(defaults: testDefaults)
+        settings.settingsPath = "/tmp/custom-config.json"
+        XCTAssertEqual(settings.settingsPath, "/tmp/custom-config.json")
+
+        let reloaded = AppSettings(defaults: testDefaults)
+        XCTAssertEqual(reloaded.settingsPath, "/tmp/custom-config.json")
+    }
+
+    func testSettingsPathClearToNil() {
+        let settings = AppSettings(defaults: testDefaults)
+        settings.settingsPath = "/tmp/config.json"
+        XCTAssertEqual(settings.settingsPath, "/tmp/config.json")
+
+        settings.settingsPath = nil
+        XCTAssertNil(settings.settingsPath)
+
+        let reloaded = AppSettings(defaults: testDefaults)
+        XCTAssertNil(reloaded.settingsPath)
+    }
 }

@@ -3,16 +3,62 @@
 // macOS 14+
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct AdvancedSettingsTab: View {
     @Environment(ShimManager.self) private var manager
     @State private var disablePassthrough: Bool = AppSettings.shared.disableChatGPTPassthrough
     @State private var showingWipeAlert = false
+    @State private var customSettingsPath: String = AppSettings.shared.settingsPath ?? ""
+    @State private var showFilePicker = false
+    @State private var taskPrompt: String = ""
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                
+
+                // --- SECTION 0: Config File ---
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Config File")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            TextField("Default: ~/.codex-shim/models.json", text: $customSettingsPath)
+                                .textFieldStyle(.roundedBorder)
+                            Button("Browse…") {
+                                let panel = NSOpenPanel()
+                                panel.title = "Select Config File"
+                                panel.canChooseDirectories = false
+                                panel.canChooseFiles = true
+                                panel.allowsMultipleSelection = false
+                                panel.allowedContentTypes = [.json]
+                                if panel.runModal() == .OK, let url = panel.urls.first {
+                                    customSettingsPath = url.path
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            if !customSettingsPath.isEmpty {
+                                Button("Reset") {
+                                    customSettingsPath = ""
+                                    AppSettings.shared.settingsPath = nil
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.small)
+                            }
+                        }
+                        Text("When set, passes `--settings <path>` to all codex-shim CLI calls. Useful for managing multiple configurations.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color(NSColor.controlBackgroundColor).opacity(0.5)))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary.opacity(0.15), lineWidth: 1))
+                }
+
                 // --- SECTION 1: Compatibilities ---
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Compatibilities")
@@ -49,8 +95,58 @@ struct AdvancedSettingsTab: View {
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color(NSColor.controlBackgroundColor).opacity(0.5)))
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary.opacity(0.15), lineWidth: 1))
                 }
-                
-                // --- SECTION 2: Diagnostics ---
+
+                // --- SECTION 2: CLI Task Runner ---
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("CLI Task Runner")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            TextField("Enter a task prompt…", text: $taskPrompt, axis: .vertical)
+                                .textFieldStyle(.roundedBorder)
+                                .lineLimit(2...4)
+                                .disabled(manager.isCliTaskRunning)
+                            Button(manager.isCliTaskRunning ? "Running…" : "Run") {
+                                Task {
+                                    await manager.runCodexTask(prompt: taskPrompt)
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
+                            .disabled(taskPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || manager.isCliTaskRunning)
+                        }
+
+                        if !manager.cliTaskOutput.isEmpty {
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    ForEach(0..<manager.cliTaskOutput.count, id: \.self) { idx in
+                                        Text(manager.cliTaskOutput[idx])
+                                            .font(.system(size: 10, design: .monospaced))
+                                            .foregroundStyle(.primary)
+                                            .textSelection(.enabled)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(8)
+                            }
+                            .frame(height: 120)
+                            .background(RoundedRectangle(cornerRadius: 6).fill(Color(NSColor.controlBackgroundColor).opacity(0.8)))
+                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.15), lineWidth: 1))
+                        }
+
+                        Text("Runs `codex-shim codex -- <prompt>` — a one-off CLI task through the shim.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color(NSColor.controlBackgroundColor).opacity(0.5)))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary.opacity(0.15), lineWidth: 1))
+                }
+
+                // --- SECTION 3: Diagnostics ---
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Diagnostics")
                         .font(.headline)
@@ -114,9 +210,13 @@ struct AdvancedSettingsTab: View {
         }
         .onAppear {
             disablePassthrough = AppSettings.shared.disableChatGPTPassthrough
+            customSettingsPath = AppSettings.shared.settingsPath ?? ""
             Task {
                 await manager.loadLogTail()
             }
+        }
+        .onChange(of: customSettingsPath) { _, newValue in
+            AppSettings.shared.settingsPath = newValue.isEmpty ? nil : newValue
         }
         .alert("Are you sure you want to clear all stored API keys?", isPresented: $showingWipeAlert) {
             Button("Clear All Keys", role: .destructive) {

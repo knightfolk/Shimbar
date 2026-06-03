@@ -147,4 +147,162 @@ final class ShimModelTests: XCTestCase {
         let model = try JSONDecoder().decode(ShimModel.self, from: data)
         XCTAssertEqual(model.apiKey, "")
     }
+
+    // MARK: - RouterCandidate
+
+    func testRouterCandidateDecodeFromJSON() throws {
+        let json = """
+        {
+            "slug": "claude-sonnet-4",
+            "cost": 0.8,
+            "supports_images": true,
+            "card": "Best for complex reasoning"
+        }
+        """
+        let data = json.data(using: .utf8)!
+        let candidate = try JSONDecoder().decode(RouterCandidate.self, from: data)
+        XCTAssertEqual(candidate.slug, "claude-sonnet-4")
+        XCTAssertEqual(candidate.cost, 0.8)
+        XCTAssertTrue(candidate.supportsImages)
+        XCTAssertEqual(candidate.card, "Best for complex reasoning")
+    }
+
+    func testRouterCandidateIdIsSlug() {
+        let c = RouterCandidate(slug: "my-model", cost: 1.0, supportsImages: false, card: "")
+        XCTAssertEqual(c.id, "my-model")
+    }
+
+    func testRouterCandidateRoundTrip() throws {
+        let candidate = RouterCandidate(slug: "test", cost: 0.5, supportsImages: true, card: "card text")
+        let data = try JSONEncoder().encode(candidate)
+        let decoded = try JSONDecoder().decode(RouterCandidate.self, from: data)
+        XCTAssertEqual(candidate.slug, decoded.slug)
+        XCTAssertEqual(candidate.cost, decoded.cost)
+        XCTAssertEqual(candidate.supportsImages, decoded.supportsImages)
+        XCTAssertEqual(candidate.card, decoded.card)
+    }
+
+    // MARK: - RouterConfig
+
+    func testRouterConfigDecodeFromJSON() throws {
+        let json = """
+        {
+            "enabled": true,
+            "slug": "codex-auto",
+            "display_name": "Auto (smart routing)",
+            "classifier": "gpt-5.4-mini",
+            "threshold": 0.75,
+            "default": "claude-sonnet-4",
+            "cache": true,
+            "candidates": [
+                {"slug": "claude-sonnet-4", "cost": 0.8, "supports_images": true, "card": "Reasoning"},
+                {"slug": "gpt-5.4-mini", "cost": 0.2, "supports_images": true, "card": "Fast"}
+            ]
+        }
+        """
+        let data = json.data(using: .utf8)!
+        let router = try JSONDecoder().decode(RouterConfig.self, from: data)
+
+        XCTAssertTrue(router.enabled)
+        XCTAssertEqual(router.slug, "codex-auto")
+        XCTAssertEqual(router.displayName, "Auto (smart routing)")
+        XCTAssertEqual(router.classifier, "gpt-5.4-mini")
+        XCTAssertEqual(router.threshold, 0.75)
+        XCTAssertEqual(router.defaultModel, "claude-sonnet-4")
+        XCTAssertTrue(router.cache)
+        XCTAssertEqual(router.candidates.count, 2)
+        XCTAssertEqual(router.candidates[0].slug, "claude-sonnet-4")
+        XCTAssertEqual(router.candidates[1].cost, 0.2)
+    }
+
+    func testRouterConfigRoundTrip() throws {
+        let router = RouterConfig(
+            enabled: true,
+            slug: "codex-auto",
+            displayName: "Auto",
+            classifier: "cheap",
+            threshold: 0.5,
+            defaultModel: "fallback",
+            cache: false,
+            candidates: [
+                RouterCandidate(slug: "a", cost: 0.1, supportsImages: false, card: "fast"),
+                RouterCandidate(slug: "b", cost: 0.9, supportsImages: true, card: "smart"),
+            ]
+        )
+        let data = try JSONEncoder().encode(router)
+        let decoded = try JSONDecoder().decode(RouterConfig.self, from: data)
+
+        XCTAssertEqual(router.enabled, decoded.enabled)
+        XCTAssertEqual(router.slug, decoded.slug)
+        XCTAssertEqual(router.displayName, decoded.displayName)
+        XCTAssertEqual(router.classifier, decoded.classifier)
+        XCTAssertEqual(router.threshold, decoded.threshold)
+        XCTAssertEqual(router.defaultModel, decoded.defaultModel)
+        XCTAssertEqual(router.cache, decoded.cache)
+        XCTAssertEqual(router.candidates.count, decoded.candidates.count)
+    }
+
+    // MARK: - ModelsFile (with router)
+
+    func testModelsFileDecodeWithoutRouter() throws {
+        let json = """
+        { "models": [] }
+        """
+        let data = json.data(using: .utf8)!
+        let file = try JSONDecoder().decode(ModelsFile.self, from: data)
+        XCTAssertTrue(file.models.isEmpty)
+        XCTAssertNil(file.router)
+    }
+
+    func testModelsFileDecodeWithRouter() throws {
+        let json = """
+        {
+            "models": [
+                {"slug": "test", "model": "test", "display_name": "Test", "provider": "openai", "base_url": "https://api.test.com"}
+            ],
+            "router": {
+                "enabled": true,
+                "slug": "codex-auto",
+                "display_name": "Auto",
+                "classifier": "cheap",
+                "threshold": 0.5,
+                "default": "test",
+                "cache": true,
+                "candidates": []
+            }
+        }
+        """
+        let data = json.data(using: .utf8)!
+        let file = try JSONDecoder().decode(ModelsFile.self, from: data)
+
+        XCTAssertEqual(file.models.count, 1)
+        XCTAssertEqual(file.models[0].slug, "test")
+        XCTAssertNotNil(file.router)
+        XCTAssertTrue(file.router!.enabled)
+        XCTAssertEqual(file.router!.slug, "codex-auto")
+        XCTAssertEqual(file.router!.candidates.count, 0)
+    }
+
+    func testModelsFileRoundTripWithRouter() throws {
+        let file = ModelsFile(
+            models: [ShimModel(slug: "a", model: "a", displayName: "A", provider: "openai", baseUrl: "https://api.test.com")],
+            router: RouterConfig(
+                enabled: false,
+                slug: "codex-auto",
+                displayName: "Auto",
+                classifier: "model",
+                threshold: 0.7,
+                defaultModel: "a",
+                cache: false,
+                candidates: []
+            )
+        )
+        let data = try JSONEncoder().encode(file)
+        let decoded = try JSONDecoder().decode(ModelsFile.self, from: data)
+
+        XCTAssertEqual(decoded.models.count, 1)
+        XCTAssertNotNil(decoded.router)
+        XCTAssertEqual(decoded.router!.slug, "codex-auto")
+        XCTAssertFalse(decoded.router!.enabled)
+    }
 }

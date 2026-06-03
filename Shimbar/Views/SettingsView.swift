@@ -33,6 +33,12 @@ struct SettingsView: View {
                         Label("Zencoder", systemImage: "wand.and.stars")
                     }
                 
+                AutoRouterSettingsTab()
+                    .environment(manager)
+                    .tabItem {
+                        Label("Auto Router", systemImage: "arrow.triangle.branch")
+                    }
+                
                 AdvancedSettingsTab()
                     .environment(manager)
                     .tabItem {

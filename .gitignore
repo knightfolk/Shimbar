@@ -1,6 +1,7 @@
 # Xcode
 build/
 DerivedData/
+.build/
 
 # User-specific
 *.xcuserstate
@@ -10,7 +11,21 @@ DerivedData/
 !default.xcscheme
 
 # Swift Package Manager
-.build/
+.swiftpm/
 
 # macOS
 .DS_Store
+._*
+
+# Build artifacts
+*.dmg
+
+# Zenflow
+.zenflow-attachments/
+
+# Secrets
+.env
+.env.*
+*.p8
+*.p12
+*.pem
