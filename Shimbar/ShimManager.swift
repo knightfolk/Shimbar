@@ -151,10 +151,13 @@ final class ShimManager {
             lastError = "Failed to load models.json: \(error.localizedDescription)"
         }
 
-        // 3. Initial status refresh
+        // 3. Ensure auto-router entry is in catalog
+        injectAutoRouterIntoCatalog()
+
+        // 4. Initial status refresh
         await refreshStatus()
 
-        // 4. Check for codex-shim updates from upstream
+        // 5. Check for codex-shim updates from upstream
         if shimFound {
             await updater.checkForUpdate(shimPath: shimPath)
         }
@@ -437,7 +440,7 @@ final class ShimManager {
 
             chatGPTPassthroughAvailable = health.chatgptPassthrough
             cursorPassthroughAvailable = health.cursorPassthrough
-            autoRouterEnabled = health.autoRouter
+            autoRouterEnabled = health.autoRouter || (modelsManager.routerConfig?.enabled ?? false)
 
             await fetchLiveModels()
         } catch {
@@ -451,7 +454,7 @@ final class ShimManager {
         activeModel = nil
         chatGPTPassthroughAvailable = false
         cursorPassthroughAvailable = false
-        autoRouterEnabled = false
+        autoRouterEnabled = modelsManager.routerConfig?.enabled ?? false
     }
 
     /// Fetch the live model list from the running shim's `/v1/models` endpoint.
@@ -496,9 +499,94 @@ final class ShimManager {
                 port: settings.port,
                 settingsPath: settings.settingsPath
             )
+            injectAutoRouterIntoCatalog()
         } catch {
             lastError = "Generate failed: \(error.localizedDescription)"
             throw error
+        }
+    }
+
+    private func injectAutoRouterIntoCatalog() {
+        let router = modelsManager.routerConfig
+        let routerEnabled = router?.enabled ?? false
+        let routerSlug = router?.slug ?? "codex-auto"
+
+        let fm = FileManager.default
+        let catalogURL = fm.homeDirectoryForCurrentUser
+            .appendingPathComponent(".codex-shim/custom_model_catalog.json")
+
+        guard fm.fileExists(atPath: catalogURL.path) else { return }
+
+        do {
+            let data = try Data(contentsOf: catalogURL)
+            var catalog = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+            var models = catalog["models"] as? [[String: Any]] ?? []
+
+            let existingIdx = models.firstIndex { ($0["slug"] as? String) == routerSlug }
+
+            if !routerEnabled {
+                if let idx = existingIdx {
+                    models.remove(at: idx)
+                    catalog["models"] = models
+                    let updated = try JSONSerialization.data(withJSONObject: catalog, options: [.prettyPrinted, .sortedKeys])
+                    try updated.write(to: catalogURL, options: .atomic)
+                }
+                return
+            }
+
+            guard let router else { return }
+
+            if existingIdx == nil {
+                let entry: [String: Any] = [
+                    "slug": router.slug,
+                    "display_name": router.displayName,
+                    "description": "Auto router – classifies each task and routes to the best candidate model.",
+                    "context_window": 128000,
+                    "max_context_window": 128000,
+                    "auto_compact_token_limit": 102400,
+                    "truncation_policy": ["mode": "tokens", "limit": 40960],
+                    "default_reasoning_level": "medium",
+                    "supported_reasoning_levels": [
+                        ["effort": "low", "description": "Faster, lighter reasoning"],
+                        ["effort": "medium", "description": "Balanced speed and reasoning"],
+                        ["effort": "high", "description": "Deeper reasoning"],
+                        ["effort": "xhigh", "description": "Maximum reasoning where supported"]
+                    ],
+                    "default_reasoning_summary": "none",
+                    "supports_reasoning_summaries": false,
+                    "default_verbosity": "low",
+                    "support_verbosity": false,
+                    "apply_patch_tool_type": "freeform",
+                    "web_search_tool_type": "text_and_image",
+                    "supports_search_tool": false,
+                    "supports_parallel_tool_calls": true,
+                    "experimental_supported_tools": [],
+                    "input_modalities": ["text", "image"],
+                    "supports_image_detail_original": true,
+                    "shell_type": "shell_command",
+                    "visibility": "list",
+                    "minimal_client_version": "0.0.1",
+                    "supported_in_api": true,
+                    "availability_nux": NSNull(),
+                    "upgrade": NSNull(),
+                    "priority": 2000,
+                    "prefer_websockets": false,
+                    "available_in_plans": ["free", "plus", "pro", "team", "business", "enterprise"],
+                    "base_instructions": "You are a coding agent running in Codex through a local BYOK shim with smart auto-routing.",
+                    "model_messages": [
+                        "instructions_template": "You are Codex running through a smart auto-router that picks the best model for each task. Be a helpful, direct coding collaborator.",
+                        "instructions_variables": ["model_name": router.displayName]
+                    ]
+                ]
+                models.append(entry)
+                catalog["models"] = models
+
+                let updated = try JSONSerialization.data(withJSONObject: catalog, options: [.prettyPrinted, .sortedKeys])
+                try updated.write(to: catalogURL, options: .atomic)
+                try? fm.setAttributes([.posixPermissions: 0o644], ofItemAtPath: catalogURL.path)
+            }
+        } catch {
+            DebugLogger.log("injectAutoRouterIntoCatalog: failed: \(error)")
         }
     }
 
@@ -515,6 +603,7 @@ final class ShimManager {
                 port: settings.port,
                 settingsPath: settings.settingsPath
             )
+            injectAutoRouterIntoCatalog()
             await refreshStatus()
         } catch {
             lastError = "Start failed: \(error.localizedDescription)"
@@ -615,6 +704,7 @@ final class ShimManager {
                 port: settings.port,
                 settingsPath: settings.settingsPath
             )
+            injectAutoRouterIntoCatalog()
             await refreshStatus()
         } catch {
             lastError = "Restart failed: \(error.localizedDescription)"
@@ -801,6 +891,45 @@ final class ShimManager {
     /// Open the shim log file (`shim.log`) in the user's default editor.
     func openShimLog() {
         NSWorkspace.shared.open(resolvedLogURL)
+    }
+
+    /// Classify a Zenflow task by sending a prompt to the shim's `/v1/chat/completions` endpoint.
+    ///
+    /// - Parameters:
+    ///   - prompt: The classification prompt to send.
+    ///   - model: The model slug to use for classification.
+    /// - Returns: The classifier's content string on 2xx, `nil` otherwise.
+    func callClassifier(prompt: String, model: String) async -> String? {
+        let url = URL(string: "http://127.0.0.1:\(settings.port)/v1/chat/completions")!
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 30
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body = ChatCompletionRequest(
+            model: model,
+            messages: [ChatMessage(role: "user", content: prompt)],
+            temperature: 0.0,
+            maxTokens: 64
+        )
+
+        do {
+            let encoder = JSONEncoder()
+            encoder.keyEncodingStrategy = .convertToSnakeCase
+            request.httpBody = try encoder.encode(body)
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                return nil
+            }
+
+            let decoded = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)
+            return decoded.choices.first?.message.content.trimmingCharacters(in: .whitespacesAndNewlines)
+        } catch {
+            DebugLogger.log("ShimManager: callClassifier failed: \(error)")
+            return nil
+        }
     }
 
     /// Run a one-off Codex CLI task via `codex-shim codex -- <args>`.
