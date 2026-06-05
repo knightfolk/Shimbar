@@ -37,12 +37,12 @@ final class ShimServer {
         snapshot = ShimServerSnapshot(models: [], health: nil, state: .starting)
 
         do {
-            _ = try await ProcessRunner.runShim(
-                "start",
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
+            var args = ["--port", "\(settings.port)"]
+            if let sp = settings.settingsPath, !sp.isEmpty {
+                args += ["--settings", sp]
+            }
+            args.append("start")
+            _ = try await ProcessRunner.run(settings.shimPath, arguments: args)
 
             let healthURL = URL(string: "http://127.0.0.1:\(settings.port)/health")!
             var request = URLRequest(url: healthURL)
@@ -69,12 +69,12 @@ final class ShimServer {
         guard state == .running || state == .starting else { return }
         state = .stopping
         do {
-            _ = try await ProcessRunner.runShim(
-                "stop",
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
+            var args = ["--port", "\(settings.port)"]
+            if let sp = settings.settingsPath, !sp.isEmpty {
+                args += ["--settings", sp]
+            }
+            args.append("stop")
+            _ = try await ProcessRunner.run(settings.shimPath, arguments: args)
         } catch {}
         state = .stopped
         snapshot = .empty

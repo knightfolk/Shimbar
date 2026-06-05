@@ -88,9 +88,6 @@ final class ShimManager {
     /// Persistent user settings (polling interval, port, etc.).
     let settings = AppSettings.shared
 
-    /// Manages checking for and applying codex-shim updates from upstream.
-    let updater = ShimUpdater.shared
-
     // MARK: - Private State
 
     /// Timer used for periodic status polling.
@@ -140,6 +137,8 @@ final class ShimManager {
         isLoading = true
         defer { isLoading = false }
 
+        LegacyShimMigration.run()
+
         // 1. Locate the shim binary using multiple discovery strategies
         await discoverShimPath()
 
@@ -156,11 +155,6 @@ final class ShimManager {
 
         // 4. Initial status refresh
         await refreshStatus()
-
-        // 5. Check for codex-shim updates from upstream
-        if shimFound {
-            await updater.checkForUpdate(shimPath: shimPath)
-        }
     }
 
     /// Re-runs binary discovery and updates the shim path.
@@ -332,6 +326,20 @@ final class ShimManager {
 
     // MARK: - CLI Wrappers
 
+    private func shimArgs(_ subcommand: String, extra: [String] = []) throws -> [String] {
+        guard shimFound else {
+            throw NSError(domain: "ShimManager", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "codex-shim binary not found. Set the correct path in Settings → General."])
+        }
+        var args = ["--port", "\(settings.port)"]
+        if let sp = settings.settingsPath, !sp.isEmpty {
+            args += ["--settings", sp]
+        }
+        args.append(subcommand)
+        args.append(contentsOf: extra)
+        return args
+    }
+
     /// Checks if the Codex Desktop app is patched by looking for the needle/replacement in app.asar.
     /// Uses file metadata caching to avoid redundant byte scans.
     func checkCodexPatchedStatus() async {
@@ -464,28 +472,7 @@ final class ShimManager {
             return
         }
 
-        if settings.useNativeServer {
-            liveModels = ShimServer.shared.snapshot.models
-            return
-        }
-
-        let url = URL(string: "http://127.0.0.1:\(settings.port)/v1/models")!
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 3
-        request.httpMethod = "GET"
-
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
-                liveModels = []
-                return
-            }
-            let result = try JSONDecoder().decode(LiveModelsResponse.self, from: data)
-            liveModels = result.data
-        } catch {
-            liveModels = []
-        }
+        liveModels = ShimServer.shared.snapshot.models
     }
 
     /// Generate the shim configuration files from `models.json`.
@@ -495,12 +482,8 @@ final class ShimManager {
         defer { isLoading = false }
 
         do {
-            _ = try await ProcessRunner.runShim(
-                "generate",
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
+            let args = try shimArgs("generate")
+            _ = try await ProcessRunner.run(settings.shimPath, arguments: args)
             injectAutoRouterIntoCatalog()
         } catch {
             lastError = "Generate failed: \(error.localizedDescription)"
@@ -598,25 +581,8 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
-        if settings.useNativeServer {
-            do {
-                try await ShimServer.shared.start()
-                injectAutoRouterIntoCatalog()
-                await refreshStatus()
-            } catch {
-                lastError = "Start failed: \(error.localizedDescription)"
-                throw error
-            }
-            return
-        }
-
         do {
-            _ = try await ProcessRunner.runShim(
-                "start",
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
+            try await ShimServer.shared.start()
             injectAutoRouterIntoCatalog()
             await refreshStatus()
         } catch {
@@ -631,24 +597,8 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
-        if settings.useNativeServer {
-            try await ShimServer.shared.stop()
-            await refreshStatus()
-            return
-        }
-
-        do {
-            _ = try await ProcessRunner.runShim(
-                "stop",
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
-            await refreshStatus()
-        } catch {
-            lastError = "Stop failed: \(error.localizedDescription)"
-            throw error
-        }
+        try await ShimServer.shared.stop()
+        await refreshStatus()
     }
 
     /// Enable the shim: start the process and install the proxy configuration.
@@ -657,19 +607,9 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
-        guard shimFound else {
-            lastError = "codex-shim binary not found. Set the correct path in Settings → General."
-            throw NSError(domain: "ShimManager", code: 1,
-                          userInfo: [NSLocalizedDescriptionKey: lastError!])
-        }
-
+        let args = try shimArgs("enable")
         do {
-            let result = try await ProcessRunner.runShim(
-                "enable",
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
+            let result = try await ProcessRunner.run(settings.shimPath, arguments: args)
             if !result.succeeded {
                 let detail = result.stderr.isEmpty ? result.stdout : result.stderr
                 lastError = "Enable exited \(result.exitCode): \(detail.prefix(120))"
@@ -690,13 +630,9 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
+        let args = try shimArgs("disable")
         do {
-            let result = try await ProcessRunner.runShim(
-                "disable",
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
+            let result = try await ProcessRunner.run(settings.shimPath, arguments: args)
             if !result.succeeded {
                 let detail = result.stderr.isEmpty ? result.stdout : result.stderr
                 lastError = "Disable exited \(result.exitCode): \(detail.prefix(120))"
@@ -717,26 +653,9 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
-        if settings.useNativeServer {
-            try await ShimServer.shared.restart()
-            injectAutoRouterIntoCatalog()
-            await refreshStatus()
-            return
-        }
-
-        do {
-            _ = try await ProcessRunner.runShim(
-                "restart",
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
-            injectAutoRouterIntoCatalog()
-            await refreshStatus()
-        } catch {
-            lastError = "Restart failed: \(error.localizedDescription)"
-            throw error
-        }
+        try await ShimServer.shared.restart()
+        injectAutoRouterIntoCatalog()
+        await refreshStatus()
     }
 
     /// Switch the active model to the one identified by `slug`.
@@ -750,13 +669,8 @@ final class ShimManager {
         defer { isLoading = false }
 
         do {
-            _ = try await ProcessRunner.runShim(
-                "model",
-                arguments: ["use", slug],
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
+            let args = try shimArgs("model", extra: ["use", slug])
+            _ = try await ProcessRunner.run(settings.shimPath, arguments: args)
             activeModel = slug
             try await generate()
         } catch {
@@ -787,12 +701,8 @@ final class ShimManager {
                 let args = ["--port", "\(settings.port)", "patch-app"]
                 result = try await ProcessRunner.runElevated(settings.shimPath, arguments: args)
             } else {
-                result = try await ProcessRunner.runShim(
-                    "patch-app",
-                    shimPath: settings.shimPath,
-                    port: settings.port,
-                    settingsPath: settings.settingsPath
-                )
+                let args = try shimArgs("patch-app")
+                result = try await ProcessRunner.run(settings.shimPath, arguments: args)
             }
             // If the CLI itself reported a clear failure before writing the patch, surface it.
             if !result.succeeded && result.stdout.contains("Could not find") {
@@ -836,12 +746,8 @@ final class ShimManager {
                 let args = ["--port", "\(settings.port)", "restore-app"]
                 _ = try await ProcessRunner.runElevated(settings.shimPath, arguments: args)
             } else {
-                _ = try await ProcessRunner.runShim(
-                    "restore-app",
-                    shimPath: settings.shimPath,
-                    port: settings.port,
-                    settingsPath: settings.settingsPath
-                )
+                let args = try shimArgs("restore-app")
+                _ = try await ProcessRunner.run(settings.shimPath, arguments: args)
             }
         } catch {
             cliError = error
@@ -869,23 +775,14 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
-        // 1. Try launching natively via LaunchServices (instant and non-blocking)
         if NSWorkspace.shared.launchApplication("Codex") {
             return
         }
 
-        // 2. Fallback: run codex-shim app in the background so it doesn't block the UI thread
+        let args = (try? shimArgs("app", extra: ["."])) ?? ["--port", "\(settings.port)", "app", "."]
         let path = settings.shimPath
-        let port = settings.port
-        let settingsPth = settings.settingsPath
         Task.detached(priority: .background) {
-            _ = try? await ProcessRunner.runShim(
-                "app",
-                arguments: ["."],
-                shimPath: path,
-                port: port,
-                settingsPath: settingsPth
-            )
+            _ = try? await ProcessRunner.run(path, arguments: args)
         }
     }
 
@@ -969,13 +866,8 @@ final class ShimManager {
         defer { isCliTaskRunning = false }
 
         do {
-            let result = try await ProcessRunner.runShim(
-                "codex",
-                arguments: ["--", prompt],
-                shimPath: settings.shimPath,
-                port: settings.port,
-                settingsPath: settings.settingsPath
-            )
+            let args = try shimArgs("codex", extra: ["--", prompt])
+            let result = try await ProcessRunner.run(settings.shimPath, arguments: args)
 
             let lines = result.stdout
                 .components(separatedBy: .newlines)

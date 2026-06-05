@@ -138,35 +138,6 @@ actor ProcessRunner {
         }
     }
 
-    // MARK: - Run Shim
-
-    /// Convenience method to run a codex-shim subcommand.
-    ///
-    /// Automatically injects `--port` and passes additional arguments
-    /// to the shim binary.
-    ///
-    /// - Parameters:
-    ///   - subcommand: The shim subcommand (e.g. `"status"`, `"start"`).
-    ///   - arguments: Extra arguments appended after the subcommand.
-    ///   - shimPath: Path or command name for the shim binary.
-    ///   - port: The port the shim listens on.
-    /// - Returns: A ``ProcessResult`` with exit code and captured output.
-    static func runShim(
-        _ subcommand: String,
-        arguments: [String] = [],
-        shimPath: String = "codex-shim",
-        port: Int = 8765,
-        settingsPath: String? = nil
-    ) async throws -> ProcessResult {
-        var args = ["--port", "\(port)"]
-        if let settingsPath, !settingsPath.isEmpty {
-            args += ["--settings", settingsPath]
-        }
-        args.append(subcommand)
-        args.append(contentsOf: arguments)
-        return try await run(shimPath, arguments: args)
-    }
-
     // MARK: - Run Elevated
 
     /// Runs a command with elevated administrator privileges using AppleScript's `do shell script`.

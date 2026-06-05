@@ -48,7 +48,7 @@ final class StartupValidatorTests: XCTestCase {
 
     func testDefaultItemsCount() {
         let validator = StartupValidator()
-        XCTAssertTrue(validator.items.count >= 6, "Should have at least the 6 standard check items")
+        XCTAssertTrue(validator.items.count >= 5, "Should have at least the 5 standard check items")
     }
 
     func testDefaultCriticalItems() {

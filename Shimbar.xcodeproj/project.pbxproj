@@ -19,12 +19,13 @@
 		1A0C1D35CC8A5656C091F2AF /* ShimModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76FEAAFC7731500C13B92B4 /* ShimModel.swift */; };
 		1C9C0C66419734F9114A1F8B /* CodexConfigPatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A499948E62E41CB7177094ED /* CodexConfigPatcherTests.swift */; };
 		1D482E239F2C86A9F4BE265A /* ZenflowRouterSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DFF7130CFD81349CA95AE15 /* ZenflowRouterSettingsViewModel.swift */; };
+		1E5480133390EBCCC58C1FA7 /* AutoRouterForceReclassifyButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F6700AD0AE759BB241E0A78 /* AutoRouterForceReclassifyButtonTests.swift */; };
 		20C7F029CE4CDBBDF848B947 /* ShimManagerClassifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DD77113AD50289EC3E5672 /* ShimManagerClassifierTests.swift */; };
-		21B0F132DF87A3A21584AB72 /* ShimUpdaterRepoResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE44B770AE72FD2FEA19FEA2 /* ShimUpdaterRepoResolutionTests.swift */; };
 		2A5E5E61B1439873C850B885 /* DebugLoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5418DD3E89C648041133A6C4 /* DebugLoggerTests.swift */; };
 		353B758C3CE3673C453358F1 /* RouterStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54DD16092239DC953DDDE84C /* RouterStats.swift */; };
 		37571F0AA42D5C9BCBA52FDF /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99EA180EBC2E9A8C8057029D /* DebugLogger.swift */; };
 		38E8F5F0E552CDF3C97221D4 /* ProviderSetupWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A3D75D7E64A1F26034FF481 /* ProviderSetupWindowManager.swift */; };
+		3B1DD0F2CDC3B221A479CF7A /* LegacyShimMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0912A950FF90C5335CC2F038 /* LegacyShimMigration.swift */; };
 		41C7AAC8914160349938D981 /* ZenflowWorkflowEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EBE9A93D367F7A0A136F2A0 /* ZenflowWorkflowEditorSheet.swift */; };
 		420CD0BCAA9B2D75C1D5F352 /* ConfigWriterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D49629B8CB18B929A20347 /* ConfigWriterTests.swift */; };
 		423C717497AB2DCD831CCBAA /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E6541913E1CD7A674D2279 /* AppSettingsTests.swift */; };
@@ -35,6 +36,7 @@
 		4660CFB3F02AD1F0932505E1 /* ApiKeyValidatorParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 090E9AE44DD95C67478422B8 /* ApiKeyValidatorParsingTests.swift */; };
 		46D4EE0FD3333A56FB22D000 /* StartupValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E845A006279B40BEA3E749 /* StartupValidatorTests.swift */; };
 		46EFCF3BDAF0E98EFD8EC9F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8208C35D2E4501436F3CBF34 /* Assets.xcassets */; };
+		4A46CFE698A64B8A2807BAC8 /* ShimServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879BCB728C5C059400F18EDF /* ShimServer.swift */; };
 		4A470A4C71513A51DF83B37B /* ApiKeyValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92E2ABFDDC107F468F9CBB4 /* ApiKeyValidator.swift */; };
 		4C41D019A9C8D43B86634FD8 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27FCAACD5E67AB0D918C6221 /* SettingsView.swift */; };
 		52F962019396B52D16670E95 /* ShimManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545FF169AB727B29D43C3B10 /* ShimManager.swift */; };
@@ -46,7 +48,6 @@
 		5A3E04203FF4E5C324DA2E37 /* AutoRouterSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CDB20C05E8166E15931F334 /* AutoRouterSettingsTab.swift */; };
 		5B5D8C36C0E083B6A2833E5B /* ProviderCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DB58BEC92C7EAA0FD770B0 /* ProviderCatalog.swift */; };
 		64926F6FF315CB1013323BFF /* CatalogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6843B91BB3D4B36EF09869 /* CatalogEntry.swift */; };
-		65A72807E099404EBFBCB681 /* ShimUpdaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B83FC0FF49BD32C553AC3 /* ShimUpdaterTests.swift */; };
 		6610E52BF77D4A99C71DF560 /* GeneralSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DBA3693890C3C1D5CAF4008 /* GeneralSettingsTab.swift */; };
 		68CB2ACE664DB43FC1AFB7A3 /* ModelEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069A933D58596AE4FD5C2877 /* ModelEditorSheet.swift */; };
 		6A46F92BD34494FC1D5C33CE /* ModelsJsonManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206DD1AF91AF1F93DE99A29F /* ModelsJsonManagerTests.swift */; };
@@ -82,14 +83,15 @@
 		DDDE17979FCDC53ABDE5C3F5 /* ChatGPTCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98DEB7EC4FB21EAE389C379 /* ChatGPTCatalogTests.swift */; };
 		DF8F1311FAAA0B799E7189C6 /* ChatGPTCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51BA5D536CEBD923F34F2204 /* ChatGPTCatalog.swift */; };
 		E910011DAD51287CF7498AB9 /* ZenflowProjectSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CC367184825253FDF91E45 /* ZenflowProjectSelectionTests.swift */; };
+		EC401DC954E3C3B36CB26B68 /* RouterCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCE47148CDF29E80B03AA92D /* RouterCache.swift */; };
 		EE18CF6BF6138DE1D3B9FD7F /* TOMLEscaper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E905BBE70EB5498029A56A /* TOMLEscaper.swift */; };
 		F37F45BB13B006CAD4D40D3C /* ChatGPTUpstreamMockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AD58130A9A2C5F1207BEE6 /* ChatGPTUpstreamMockTests.swift */; };
 		F3B285279A9E8BC55EE090BA /* RouterStatsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A0D52F9ABAB69F87E0C989 /* RouterStatsTab.swift */; };
 		F5FEF49131B7D1B7563AF898 /* CodexAuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206D7DCDE044E1F23716DD23 /* CodexAuthTests.swift */; };
-		F76D2841A9FA1DCB2371094A /* ShimUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 351CD83E0089BDD4E170EDDA /* ShimUpdater.swift */; };
 		FA38BFC7D6D4DD0551595DA3 /* ZencoderSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97A338A02F5785947731CA0 /* ZencoderSettingsTests.swift */; };
 		FAD463AD2896B15863C85B5A /* ApiKeyValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E72FA82D4FD1543797F9594 /* ApiKeyValidatorTests.swift */; };
 		FC3DE6A8FC326FF96EE5A50C /* ModelsJsonManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75820BB7C35F43FF8757AA30 /* ModelsJsonManager.swift */; };
+		FD87677837C82E9957288982 /* ShimServerStartStopViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9028DD55701C831D6EC8A1DB /* ShimServerStartStopViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +110,8 @@
 		056AA117861EE64F2CEBAB72 /* StartupValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupValidator.swift; sourceTree = "<group>"; };
 		069A933D58596AE4FD5C2877 /* ModelEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelEditorSheet.swift; sourceTree = "<group>"; };
 		090E9AE44DD95C67478422B8 /* ApiKeyValidatorParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKeyValidatorParsingTests.swift; sourceTree = "<group>"; };
+		0912A950FF90C5335CC2F038 /* LegacyShimMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyShimMigration.swift; sourceTree = "<group>"; };
+		0F6700AD0AE759BB241E0A78 /* AutoRouterForceReclassifyButtonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoRouterForceReclassifyButtonTests.swift; sourceTree = "<group>"; };
 		16CC367184825253FDF91E45 /* ZenflowProjectSelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowProjectSelectionTests.swift; sourceTree = "<group>"; };
 		1898C124DBE8052F5345188F /* CatalogWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogWriter.swift; sourceTree = "<group>"; };
 		18A92F2FE03DF0A522CC9B69 /* ZenflowRouterSettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowRouterSettingsViewModelTests.swift; sourceTree = "<group>"; };
@@ -120,11 +124,9 @@
 		27DB01BA850457CD3C54A6A1 /* AdvancedSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsTab.swift; sourceTree = "<group>"; };
 		27FCAACD5E67AB0D918C6221 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		28FE434059B4A7A2DB72A92E /* ZenflowWorkflowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowWorkflowManager.swift; sourceTree = "<group>"; };
-		2B7B83FC0FF49BD32C553AC3 /* ShimUpdaterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimUpdaterTests.swift; sourceTree = "<group>"; };
 		2CACB73368A84C5CB3C5D58E /* Shimbar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shimbar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		317D9F04903A928B1C4E2AE2 /* ZenflowRouterManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowRouterManagerTests.swift; sourceTree = "<group>"; };
 		3312C31E1EB227830B45A4E5 /* ShimStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimStatusTests.swift; sourceTree = "<group>"; };
-		351CD83E0089BDD4E170EDDA /* ShimUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimUpdater.swift; sourceTree = "<group>"; };
 		39982D0809BA72CF0FCA5063 /* ShimStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimStatus.swift; sourceTree = "<group>"; };
 		3BEB3534948DB0F4C10BE0E8 /* Shimbar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Shimbar.entitlements; sourceTree = "<group>"; };
 		3CDB20C05E8166E15931F334 /* AutoRouterSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoRouterSettingsTab.swift; sourceTree = "<group>"; };
@@ -147,8 +149,10 @@
 		8208C35D2E4501436F3CBF34 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		82214BF7026932AC48F47FD9 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
 		83AE950E84863CA7745A9C9D /* ZencoderSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZencoderSettingsManager.swift; sourceTree = "<group>"; };
+		879BCB728C5C059400F18EDF /* ShimServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimServer.swift; sourceTree = "<group>"; };
 		88D49629B8CB18B929A20347 /* ConfigWriterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigWriterTests.swift; sourceTree = "<group>"; };
 		8B6843B91BB3D4B36EF09869 /* CatalogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogEntry.swift; sourceTree = "<group>"; };
+		9028DD55701C831D6EC8A1DB /* ShimServerStartStopViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimServerStartStopViewModelTests.swift; sourceTree = "<group>"; };
 		917BEBF2B139A77E577082E6 /* WorkflowTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowTemplateTests.swift; sourceTree = "<group>"; };
 		99EA180EBC2E9A8C8057029D /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		9A1D0529392FB1E57C575141 /* ProviderCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderCatalogTests.swift; sourceTree = "<group>"; };
@@ -174,13 +178,13 @@
 		C13E7594A905E6039D70D895 /* ZenflowRouterConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowRouterConfigTests.swift; sourceTree = "<group>"; };
 		CE3A3501139BB533B9656BF7 /* ZenflowWorkflowManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowWorkflowManagerTests.swift; sourceTree = "<group>"; };
 		CE41330DE0153BA3DB10E53A /* ZenflowRouterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowRouterManager.swift; sourceTree = "<group>"; };
-		CE44B770AE72FD2FEA19FEA2 /* ShimUpdaterRepoResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimUpdaterRepoResolutionTests.swift; sourceTree = "<group>"; };
 		D046B51804228B5A79E5B7E9 /* ZenflowWorkflow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowWorkflow.swift; sourceTree = "<group>"; };
 		D5DB58BEC92C7EAA0FD770B0 /* ProviderCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderCatalog.swift; sourceTree = "<group>"; };
 		D76FEAAFC7731500C13B92B4 /* ShimModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimModel.swift; sourceTree = "<group>"; };
 		D92E2ABFDDC107F468F9CBB4 /* ApiKeyValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKeyValidator.swift; sourceTree = "<group>"; };
 		D932368BD8501309E54E6B33 /* ProcessRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRunnerTests.swift; sourceTree = "<group>"; };
 		DB4837D4C87633E992ADA5C3 /* ZencoderSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZencoderSettings.swift; sourceTree = "<group>"; };
+		DCE47148CDF29E80B03AA92D /* RouterCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterCache.swift; sourceTree = "<group>"; };
 		E2E905BBE70EB5498029A56A /* TOMLEscaper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOMLEscaper.swift; sourceTree = "<group>"; };
 		E6BE0E69D2A88920FE689350 /* ShimModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimModelTests.swift; sourceTree = "<group>"; };
 		E97A338A02F5785947731CA0 /* ZencoderSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZencoderSettingsTests.swift; sourceTree = "<group>"; };
@@ -196,6 +200,8 @@
 		0DD5AF612BCE9094647F9D22 /* ServerKit */ = {
 			isa = PBXGroup;
 			children = (
+				DCE47148CDF29E80B03AA92D /* RouterCache.swift */,
+				879BCB728C5C059400F18EDF /* ShimServer.swift */,
 				730AF2709F327F0EFD180304 /* Catalog */,
 				6A9C4C6C2A9B4D05A038F3F0 /* Passthrough */,
 			);
@@ -208,6 +214,7 @@
 				090E9AE44DD95C67478422B8 /* ApiKeyValidatorParsingTests.swift */,
 				1E72FA82D4FD1543797F9594 /* ApiKeyValidatorTests.swift */,
 				B9E6541913E1CD7A674D2279 /* AppSettingsTests.swift */,
+				0F6700AD0AE759BB241E0A78 /* AutoRouterForceReclassifyButtonTests.swift */,
 				B1C0800C681734374B93391E /* CatalogEntryTests.swift */,
 				A98686A17BE980653FD23E27 /* ChatCompletionModelsTests.swift */,
 				B98DEB7EC4FB21EAE389C379 /* ChatGPTCatalogTests.swift */,
@@ -224,9 +231,8 @@
 				9AEE26B025834FF402A53BAA /* RouterStatsManagerTests.swift */,
 				F0DD77113AD50289EC3E5672 /* ShimManagerClassifierTests.swift */,
 				E6BE0E69D2A88920FE689350 /* ShimModelTests.swift */,
+				9028DD55701C831D6EC8A1DB /* ShimServerStartStopViewModelTests.swift */,
 				3312C31E1EB227830B45A4E5 /* ShimStatusTests.swift */,
-				CE44B770AE72FD2FEA19FEA2 /* ShimUpdaterRepoResolutionTests.swift */,
-				2B7B83FC0FF49BD32C553AC3 /* ShimUpdaterTests.swift */,
 				79E845A006279B40BEA3E749 /* StartupValidatorTests.swift */,
 				917BEBF2B139A77E577082E6 /* WorkflowTemplateTests.swift */,
 				E97A338A02F5785947731CA0 /* ZencoderSettingsTests.swift */,
@@ -330,6 +336,7 @@
 				99EA180EBC2E9A8C8057029D /* DebugLogger.swift */,
 				0491C49EB9B363FB4BBA16CD /* Info.plist */,
 				82214BF7026932AC48F47FD9 /* KeychainManager.swift */,
+				0912A950FF90C5335CC2F038 /* LegacyShimMigration.swift */,
 				481027CE46AA9FB8F37BD88E /* LoginItemManager.swift */,
 				75820BB7C35F43FF8757AA30 /* ModelsJsonManager.swift */,
 				6E37EBEB2E70E9EF544C6776 /* OnboardingWindowManager.swift */,
@@ -338,7 +345,6 @@
 				3BEB3534948DB0F4C10BE0E8 /* Shimbar.entitlements */,
 				AECB1D8213B22B0E3A1E9665 /* ShimbarApp.swift */,
 				545FF169AB727B29D43C3B10 /* ShimManager.swift */,
-				351CD83E0089BDD4E170EDDA /* ShimUpdater.swift */,
 				056AA117861EE64F2CEBAB72 /* StartupValidator.swift */,
 				83AE950E84863CA7745A9C9D /* ZencoderSettingsManager.swift */,
 				CE41330DE0153BA3DB10E53A /* ZenflowRouterManager.swift */,
@@ -439,6 +445,7 @@
 				4660CFB3F02AD1F0932505E1 /* ApiKeyValidatorParsingTests.swift in Sources */,
 				FAD463AD2896B15863C85B5A /* ApiKeyValidatorTests.swift in Sources */,
 				423C717497AB2DCD831CCBAA /* AppSettingsTests.swift in Sources */,
+				1E5480133390EBCCC58C1FA7 /* AutoRouterForceReclassifyButtonTests.swift in Sources */,
 				53B5604E781C5D315C29CF14 /* CatalogEntryTests.swift in Sources */,
 				737B3795BEE3186ACFEA2699 /* ChatCompletionModelsTests.swift in Sources */,
 				DDDE17979FCDC53ABDE5C3F5 /* ChatGPTCatalogTests.swift in Sources */,
@@ -455,9 +462,8 @@
 				06E964D3302FDD99B54D7D49 /* RouterStatsManagerTests.swift in Sources */,
 				20C7F029CE4CDBBDF848B947 /* ShimManagerClassifierTests.swift in Sources */,
 				C575AAB8EA89F7BB87D294AE /* ShimModelTests.swift in Sources */,
+				FD87677837C82E9957288982 /* ShimServerStartStopViewModelTests.swift in Sources */,
 				07E17905ECE5894A79822D10 /* ShimStatusTests.swift in Sources */,
-				21B0F132DF87A3A21584AB72 /* ShimUpdaterRepoResolutionTests.swift in Sources */,
-				65A72807E099404EBFBCB681 /* ShimUpdaterTests.swift in Sources */,
 				46D4EE0FD3333A56FB22D000 /* StartupValidatorTests.swift in Sources */,
 				53EBC1EB6E88CBAD01080161 /* WorkflowTemplateTests.swift in Sources */,
 				FA38BFC7D6D4DD0551595DA3 /* ZencoderSettingsTests.swift in Sources */,
@@ -490,6 +496,7 @@
 				37571F0AA42D5C9BCBA52FDF /* DebugLogger.swift in Sources */,
 				6610E52BF77D4A99C71DF560 /* GeneralSettingsTab.swift in Sources */,
 				4614916A01CC51D0218CE524 /* KeychainManager.swift in Sources */,
+				3B1DD0F2CDC3B221A479CF7A /* LegacyShimMigration.swift in Sources */,
 				B7B14C4C39AF5A2F2C88EE48 /* LoginItemManager.swift in Sources */,
 				68CB2ACE664DB43FC1AFB7A3 /* ModelEditorSheet.swift in Sources */,
 				5370D5C402222E2A4B84D272 /* ModelListRow.swift in Sources */,
@@ -502,15 +509,16 @@
 				38E8F5F0E552CDF3C97221D4 /* ProviderSetupWindowManager.swift in Sources */,
 				C1A09C6A6617CBB646212A16 /* ProviderSetupWizard.swift in Sources */,
 				1568B11111D5D55B27338E32 /* ProvidersSettingsTab.swift in Sources */,
+				EC401DC954E3C3B36CB26B68 /* RouterCache.swift in Sources */,
 				353B758C3CE3673C453358F1 /* RouterStats.swift in Sources */,
 				F3B285279A9E8BC55EE090BA /* RouterStatsTab.swift in Sources */,
 				4C41D019A9C8D43B86634FD8 /* SettingsView.swift in Sources */,
 				52F962019396B52D16670E95 /* ShimManager.swift in Sources */,
 				BD69AC32E96B1264E4B5A712 /* ShimMenuView.swift in Sources */,
 				1A0C1D35CC8A5656C091F2AF /* ShimModel.swift in Sources */,
+				4A46CFE698A64B8A2807BAC8 /* ShimServer.swift in Sources */,
 				09CF6681DB3BD63CCA9B73DF /* ShimStatus.swift in Sources */,
 				55BEAEE688CAA40835D7BF5C /* ShimStatusIcon.swift in Sources */,
-				F76D2841A9FA1DCB2371094A /* ShimUpdater.swift in Sources */,
 				B1585733304D2AE013808D8F /* ShimbarApp.swift in Sources */,
 				4285E5473F5ED034B6902FF8 /* StartupValidator.swift in Sources */,
 				EE18CF6BF6138DE1D3B9FD7F /* TOMLEscaper.swift in Sources */,

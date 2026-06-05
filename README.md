@@ -35,7 +35,6 @@ A native macOS menu bar utility for the `codex-shim` local proxy daemon. **Shimb
 - **Zencoder Sync**: Export providers and models to Zencoder's `~/.zencoder/settings.json` so they appear as first-party model options.
 - **Diagnostics Log Stream**: Monospaced diagnostics scroll pane displaying live updates from your `shim.log` file.
 - **Electron Application Patching**: Easily patch and restore Codex Desktop to route its traffic through Shimbar's local port.
-- **Automatic `codex-shim` Upgrades**: Background checking of the upstream repository for updates with one-click, in-app installation. It features intelligent rebase merging to preserve local edits, native `uv tool` upgrade support, and sandboxed/elevated ownership chown resolution.
 - **Launch at Login**: Integrates with ServiceManagement to run automatically at macOS startup.
 
 ---
@@ -56,6 +55,8 @@ A native macOS menu bar utility for the `codex-shim` local proxy daemon. **Shimb
 1. Go to the [Releases](https://github.com/knightfolk/Shimbar/releases) section on GitHub.
 2. Download the latest **`Shimbar-Beta.dmg`** package.
 3. Mount the DMG and drag **Shimbar** to your **Applications** folder to install.
+
+> **Note:** Shimbar runs the `codex-shim` CLI binary natively and does not require Python. If you previously used `codex-shim install`, you can install without Python by running `codex-shim install --install-without-python`.
 
 ### Building from Source
 
@@ -96,7 +97,7 @@ make run
 | `ApiKeyValidator.swift` | Async network validator for credentials and dynamic model discovery. |
 | `ModelsJsonManager.swift` | Local parser loading and saving `~/.codex-shim/models.json` atomically with backup streams and router config support. |
 | `ProcessRunner.swift` | Actor-based async shell command runner with `--port` / `--settings` injection and elevated privilege support. |
-| `ShimUpdater.swift` | Upstream `codex-shim` repository checker and one-click installer. |
+| `LegacyShimMigration.swift` | One-time migration helper that stops legacy Python shim processes on upgrade. |
 | `ZencoderSettingsManager.swift` | Syncs providers and models to `~/.zencoder/settings.json`. |
 | `ZenflowWorkflowManager.swift` | Manages Zenflow workflow templates and execution. |
 | `ShimModel.swift` | Core model types: `ShimModel`, `RouterConfig`, `RouterCandidate`, `ModelsFile`. |
