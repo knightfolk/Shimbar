@@ -16,6 +16,7 @@ struct AutoRouterSettingsTab: View {
     @State private var candidates: [RouterCandidate] = []
     @State private var isSaving = false
     @State private var showSaveError: String?
+    @State private var didForceReclassify = false
 
     private var modelSlugs: [String] {
         manager.modelsManager.models.map(\.slug)
@@ -175,6 +176,24 @@ struct AutoRouterSettingsTab: View {
                             .font(.caption)
                             .foregroundStyle(.red)
                     }
+                    Button("Force Reclassify Next Request") {
+                        RouterCache.reset()
+                        ModelsJsonManager.shared.regenerateCatalogAndConfig()
+                        didForceReclassify = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            didForceReclassify = false
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .help("Drops the router cache so the next request is re-classified from scratch.")
+
+                    if didForceReclassify {
+                        Text("Cache cleared")
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                    }
+
                     Button("Save & Apply") {
                         saveRouterConfig()
                     }

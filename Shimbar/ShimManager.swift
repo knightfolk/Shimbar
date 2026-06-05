@@ -458,12 +458,14 @@ final class ShimManager {
     }
 
     /// Fetch the live model list from the running shim's `/v1/models` endpoint.
-    ///
-    /// Returns the OpenAI-compatible `{object: "list", data: [{id, object, created, owned_by}]}` response.
-    /// Stores the result in `liveModels` for use by UI views and other manager methods.
     func fetchLiveModels() async {
         guard status == .running else {
             liveModels = []
+            return
+        }
+
+        if settings.useNativeServer {
+            liveModels = ShimServer.shared.snapshot.models
             return
         }
 
@@ -596,6 +598,18 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
+        if settings.useNativeServer {
+            do {
+                try await ShimServer.shared.start()
+                injectAutoRouterIntoCatalog()
+                await refreshStatus()
+            } catch {
+                lastError = "Start failed: \(error.localizedDescription)"
+                throw error
+            }
+            return
+        }
+
         do {
             _ = try await ProcessRunner.runShim(
                 "start",
@@ -616,6 +630,12 @@ final class ShimManager {
         isLoading = true
         lastError = nil
         defer { isLoading = false }
+
+        if settings.useNativeServer {
+            try await ShimServer.shared.stop()
+            await refreshStatus()
+            return
+        }
 
         do {
             _ = try await ProcessRunner.runShim(
@@ -696,6 +716,13 @@ final class ShimManager {
         isLoading = true
         lastError = nil
         defer { isLoading = false }
+
+        if settings.useNativeServer {
+            try await ShimServer.shared.restart()
+            injectAutoRouterIntoCatalog()
+            await refreshStatus()
+            return
+        }
 
         do {
             _ = try await ProcessRunner.runShim(

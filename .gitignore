@@ -31,3 +31,4 @@ agents.md
 *.p8
 *.p12
 *.pem
+.cursor-temp/

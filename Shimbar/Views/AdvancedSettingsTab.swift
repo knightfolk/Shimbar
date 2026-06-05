@@ -7,11 +7,14 @@ import UniformTypeIdentifiers
 
 struct AdvancedSettingsTab: View {
     @Environment(ShimManager.self) private var manager
+    @Environment(ShimServer.self) private var server
     @State private var disablePassthrough: Bool = AppSettings.shared.disableChatGPTPassthrough
     @State private var showingWipeAlert = false
     @State private var customSettingsPath: String = AppSettings.shared.settingsPath ?? ""
     @State private var showFilePicker = false
     @State private var taskPrompt: String = ""
+    @State private var testPromptResponse: String? = nil
+    @State private var isSendingTestPrompt: Bool = false
     
     var body: some View {
         ScrollView {
@@ -96,37 +99,33 @@ struct AdvancedSettingsTab: View {
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary.opacity(0.15), lineWidth: 1))
                 }
 
-                // --- SECTION 2: CLI Task Runner ---
+                // --- SECTION 2: Send Test Prompt ---
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("CLI Task Runner")
+                    Text("Send Test Prompt")
                         .font(.headline)
                         .foregroundStyle(.primary)
 
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
-                            TextField("Enter a task prompt…", text: $taskPrompt, axis: .vertical)
+                            TextField("Enter a test prompt…", text: $taskPrompt, axis: .vertical)
                                 .textFieldStyle(.roundedBorder)
                                 .lineLimit(2...4)
-                                .disabled(manager.isCliTaskRunning)
-                            Button(manager.isCliTaskRunning ? "Running…" : "Run") {
-                                Task {
-                                    await manager.runCodexTask(prompt: taskPrompt)
-                                }
+                                .disabled(isSendingTestPrompt)
+                            Button(isSendingTestPrompt ? "Sending…" : "Send") {
+                                sendTestPrompt()
                             }
                             .buttonStyle(.borderedProminent)
                             .controlSize(.small)
-                            .disabled(taskPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || manager.isCliTaskRunning)
+                            .disabled(taskPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSendingTestPrompt)
                         }
 
-                        if !manager.cliTaskOutput.isEmpty {
+                        if let response = testPromptResponse {
                             ScrollView {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    ForEach(0..<manager.cliTaskOutput.count, id: \.self) { idx in
-                                        Text(manager.cliTaskOutput[idx])
-                                            .font(.system(size: 10, design: .monospaced))
-                                            .foregroundStyle(.primary)
-                                            .textSelection(.enabled)
-                                    }
+                                    Text(response)
+                                        .font(.system(size: 10, design: .monospaced))
+                                        .foregroundStyle(.primary)
+                                        .textSelection(.enabled)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(8)
@@ -136,7 +135,7 @@ struct AdvancedSettingsTab: View {
                             .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.15), lineWidth: 1))
                         }
 
-                        Text("Runs `codex-shim codex -- <prompt>` — a one-off CLI task through the shim.")
+                        Text("Sends a test prompt through the native ShimServer to verify the in-process server is working.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -228,6 +227,19 @@ struct AdvancedSettingsTab: View {
         }
     }
     
+    private func sendTestPrompt() {
+        isSendingTestPrompt = true
+        testPromptResponse = nil
+        Task {
+            let model = manager.activeModel ?? manager.models.first?.slug ?? "gpt-4o"
+            let result = await server.sendTestPrompt(taskPrompt, model: model)
+            await MainActor.run {
+                isSendingTestPrompt = false
+                testPromptResponse = result ?? "(no response — server may not be running)"
+            }
+        }
+    }
+
     private func resetAllKeys() {
         let providers = KeychainManager.storedProviderIds()
         for p in providers {

@@ -10,6 +10,8 @@ struct ShimbarApp: App {
     @State private var shimManager = ShimManager.shared
     // Zenflow auto router config / cache / decision-log manager.
     @State private var routerManager = ZenflowRouterManager.shared
+    // Native in-process server (Phase 9).
+    @State private var shimServer = ShimServer.shared
 
     var body: some Scene {
         // Menu bar item showing the daemon status icon
@@ -17,6 +19,7 @@ struct ShimbarApp: App {
             ShimMenuView()
                 .environment(shimManager)
                 .environment(routerManager)
+                .environment(shimServer)
         } label: {
             ShimStatusIcon(status: shimManager.status)
         }
@@ -27,6 +30,7 @@ struct ShimbarApp: App {
             SettingsView()
                 .environment(shimManager)
                 .environment(routerManager)
+                .environment(shimServer)
         }
     }
     

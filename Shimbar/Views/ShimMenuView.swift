@@ -9,6 +9,7 @@ import SwiftUI
 struct ShimMenuView: View {
 
     @Environment(ShimManager.self) private var manager
+    @Environment(ShimServer.self) private var server
     @Environment(\.openSettings) private var openSettings
     @State private var isAutoSetupRunning = false
     @State private var autoSetupMessage: String? = nil
@@ -260,6 +261,8 @@ struct ShimMenuView: View {
                 .font(.system(size: 14, weight: .semibold))
 
             Spacer()
+
+            NativeServerBadge(useNativeServer: AppSettings.shared.useNativeServer)
 
             statusBadge
         }

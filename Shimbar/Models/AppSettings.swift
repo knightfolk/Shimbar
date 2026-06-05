@@ -28,6 +28,7 @@ class AppSettings {
         static let lastActiveModel = "shimbar.lastActiveModel"
         static let collapseModelSection = "shimbar.collapseModelSection"
         static let settingsPath = "shimbar.settingsPath"
+        static let useNativeServer = "shimbar.useNativeServer"
     }
 
     // MARK: - Defaults
@@ -38,6 +39,7 @@ class AppSettings {
         static let pollingInterval: Double = 5.0
         static let disableChatGPTPassthrough = false
         static let collapseModelSection = false
+        static let useNativeServer = false
     }
 
     // MARK: - Storage
@@ -86,6 +88,12 @@ class AppSettings {
         didSet { defaults.set(settingsPath, forKey: Keys.settingsPath) }
     }
 
+    /// When `true`, the app uses the in-process native Swift server
+    /// instead of spawning the codex-shim CLI subprocess.
+    var useNativeServer: Bool {
+        didSet { defaults.set(useNativeServer, forKey: Keys.useNativeServer) }
+    }
+
     // MARK: - Initialization
 
     /// Creates an `AppSettings` instance backed by the given
@@ -103,6 +111,7 @@ class AppSettings {
             Keys.pollingInterval: Defaults.pollingInterval,
             Keys.disableChatGPTPassthrough: Defaults.disableChatGPTPassthrough,
             Keys.collapseModelSection: Defaults.collapseModelSection,
+            Keys.useNativeServer: Defaults.useNativeServer,
         ])
 
         self.shimPath = defaults.string(forKey: Keys.shimPath) ?? Defaults.shimPath
@@ -116,5 +125,6 @@ class AppSettings {
         self.lastActiveModel = defaults.string(forKey: Keys.lastActiveModel)
         self.collapseModelSection = defaults.bool(forKey: Keys.collapseModelSection)
         self.settingsPath = defaults.string(forKey: Keys.settingsPath)
+        self.useNativeServer = defaults.bool(forKey: Keys.useNativeServer)
     }
 }

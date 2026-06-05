@@ -6,6 +6,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(ShimManager.self) private var manager
+    @Environment(ShimServer.self) private var server
     
     var body: some View {
         VStack(spacing: 0) {
@@ -53,6 +54,7 @@ struct SettingsView: View {
                 
                 AdvancedSettingsTab()
                     .environment(manager)
+                    .environment(server)
                     .tabItem {
                         Label("Advanced", systemImage: "gearshape.2")
                     }

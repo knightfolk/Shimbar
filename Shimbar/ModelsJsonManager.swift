@@ -13,7 +13,9 @@ class ModelsJsonManager {
     let modelsJsonURL: URL
     var models: [ShimModel] = []
     var routerConfig: RouterConfig?
-    
+
+    var onChange: (() -> Void)?
+
     init(modelsJsonURL: URL? = nil) {
         let url = modelsJsonURL ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".codex-shim/models.json")
         self.modelsJsonURL = url
@@ -107,6 +109,38 @@ class ModelsJsonManager {
         try data.write(to: modelsJsonURL, options: .atomic)
         
         try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: modelsJsonURL.path)
+
+        regenerateCatalogAndConfig()
+    }
+
+    func regenerateCatalogAndConfig() {
+        let fm = FileManager.default
+        let home = fm.homeDirectoryForCurrentUser
+        let catalogURL = home.appendingPathComponent(".codex-shim/custom_model_catalog.json")
+        let configURL = home.appendingPathComponent(".codex-shim/config.toml")
+
+        do {
+            try CatalogWriter.write(models: models, routerConfig: routerConfig, to: catalogURL)
+            try ConfigWriter.write(
+                models: models,
+                catalogPath: catalogURL.path,
+                port: 8765,
+                to: configURL
+            )
+        } catch {
+            DebugLogger.log("ModelsJsonManager: regenerateCatalogAndConfig failed: \(error)")
+        }
+
+        dropRouterCache()
+        onChange?()
+    }
+
+    private func dropRouterCache() {
+        let cacheURL = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".zenflow/router-cache.json")
+        if FileManager.default.fileExists(atPath: cacheURL.path) {
+            try? FileManager.default.removeItem(at: cacheURL)
+        }
     }
     
     /// Adds one or more selected models for a given provider, merging with the existing models list.

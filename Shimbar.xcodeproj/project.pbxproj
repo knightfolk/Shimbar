@@ -17,6 +17,7 @@
 		1338E39C87C3815FE628E9BF /* ModelsJsonManagerCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806D0127AF4C8C8742756BEA /* ModelsJsonManagerCRUDTests.swift */; };
 		1568B11111D5D55B27338E32 /* ProvidersSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6748755516C506A573A6E7AF /* ProvidersSettingsTab.swift */; };
 		1A0C1D35CC8A5656C091F2AF /* ShimModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76FEAAFC7731500C13B92B4 /* ShimModel.swift */; };
+		1C9C0C66419734F9114A1F8B /* CodexConfigPatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A499948E62E41CB7177094ED /* CodexConfigPatcherTests.swift */; };
 		1D482E239F2C86A9F4BE265A /* ZenflowRouterSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DFF7130CFD81349CA95AE15 /* ZenflowRouterSettingsViewModel.swift */; };
 		20C7F029CE4CDBBDF848B947 /* ShimManagerClassifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DD77113AD50289EC3E5672 /* ShimManagerClassifierTests.swift */; };
 		21B0F132DF87A3A21584AB72 /* ShimUpdaterRepoResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE44B770AE72FD2FEA19FEA2 /* ShimUpdaterRepoResolutionTests.swift */; };
@@ -25,6 +26,7 @@
 		37571F0AA42D5C9BCBA52FDF /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99EA180EBC2E9A8C8057029D /* DebugLogger.swift */; };
 		38E8F5F0E552CDF3C97221D4 /* ProviderSetupWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A3D75D7E64A1F26034FF481 /* ProviderSetupWindowManager.swift */; };
 		41C7AAC8914160349938D981 /* ZenflowWorkflowEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EBE9A93D367F7A0A136F2A0 /* ZenflowWorkflowEditorSheet.swift */; };
+		420CD0BCAA9B2D75C1D5F352 /* ConfigWriterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D49629B8CB18B929A20347 /* ConfigWriterTests.swift */; };
 		423C717497AB2DCD831CCBAA /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E6541913E1CD7A674D2279 /* AppSettingsTests.swift */; };
 		4285E5473F5ED034B6902FF8 /* StartupValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056AA117861EE64F2CEBAB72 /* StartupValidator.swift */; };
 		45329BA09DB6919B8C9B17DA /* ZenflowRouterManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 317D9F04903A928B1C4E2AE2 /* ZenflowRouterManagerTests.swift */; };
@@ -37,21 +39,25 @@
 		4C41D019A9C8D43B86634FD8 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27FCAACD5E67AB0D918C6221 /* SettingsView.swift */; };
 		52F962019396B52D16670E95 /* ShimManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545FF169AB727B29D43C3B10 /* ShimManager.swift */; };
 		5370D5C402222E2A4B84D272 /* ModelListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A541027142E2E45F73EDDBDE /* ModelListRow.swift */; };
+		53B5604E781C5D315C29CF14 /* CatalogEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C0800C681734374B93391E /* CatalogEntryTests.swift */; };
 		53EBC1EB6E88CBAD01080161 /* WorkflowTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917BEBF2B139A77E577082E6 /* WorkflowTemplateTests.swift */; };
 		55BEAEE688CAA40835D7BF5C /* ShimStatusIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B504F00B161268564759F9CE /* ShimStatusIcon.swift */; };
 		58DBF0665BBA51351002A120 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C1E26AD399C372C5607C69 /* AppSettings.swift */; };
 		5A3E04203FF4E5C324DA2E37 /* AutoRouterSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CDB20C05E8166E15931F334 /* AutoRouterSettingsTab.swift */; };
 		5B5D8C36C0E083B6A2833E5B /* ProviderCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DB58BEC92C7EAA0FD770B0 /* ProviderCatalog.swift */; };
+		64926F6FF315CB1013323BFF /* CatalogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6843B91BB3D4B36EF09869 /* CatalogEntry.swift */; };
 		65A72807E099404EBFBCB681 /* ShimUpdaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B83FC0FF49BD32C553AC3 /* ShimUpdaterTests.swift */; };
 		6610E52BF77D4A99C71DF560 /* GeneralSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DBA3693890C3C1D5CAF4008 /* GeneralSettingsTab.swift */; };
 		68CB2ACE664DB43FC1AFB7A3 /* ModelEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069A933D58596AE4FD5C2877 /* ModelEditorSheet.swift */; };
 		6A46F92BD34494FC1D5C33CE /* ModelsJsonManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206DD1AF91AF1F93DE99A29F /* ModelsJsonManagerTests.swift */; };
 		6B058C6B59C6679FBD141D9A /* ModelsSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42D4E81616FAF06B722CD4D4 /* ModelsSettingsTab.swift */; };
+		6C02F511EC78855B959FDE70 /* CodexConfigPatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3BAA3249667321D984403B5 /* CodexConfigPatcher.swift */; };
 		70DC72BEBDD4BC8A2A9CA447 /* ChatGPTPassthroughProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82DC915B01B776BB36A273C /* ChatGPTPassthroughProbe.swift */; };
 		72FCE2F1F1FB221CE4B2DE09 /* ProcessRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D932368BD8501309E54E6B33 /* ProcessRunnerTests.swift */; };
 		736286C2301495CE57C8A9B9 /* ChatGPTUpstream.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DC24D5CE8C67B86ABCE3F3 /* ChatGPTUpstream.swift */; };
 		737B3795BEE3186ACFEA2699 /* ChatCompletionModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98686A17BE980653FD23E27 /* ChatCompletionModelsTests.swift */; };
 		7C8909CCB9ACD8848F5FA305 /* ZenflowWorkflowManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3A3501139BB533B9656BF7 /* ZenflowWorkflowManagerTests.swift */; };
+		7C9FD274A5549EDC14DDBF93 /* CatalogWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1898C124DBE8052F5345188F /* CatalogWriter.swift */; };
 		804BD9BA43A2825387F85096 /* ZenflowRouterSettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A92F2FE03DF0A522CC9B69 /* ZenflowRouterSettingsViewModelTests.swift */; };
 		825DBBEB10C8E20ADBB96283 /* ZenflowRouterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE41330DE0153BA3DB10E53A /* ZenflowRouterManager.swift */; };
 		82CB1B5A0B8CBFEA9646E870 /* ZenflowRouterConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55B6D4D2528779010F6601AB /* ZenflowRouterConfig.swift */; };
@@ -70,11 +76,13 @@
 		C567303C1CF9888B67A44012 /* ZenflowWorkflow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D046B51804228B5A79E5B7E9 /* ZenflowWorkflow.swift */; };
 		C575AAB8EA89F7BB87D294AE /* ShimModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6BE0E69D2A88920FE689350 /* ShimModelTests.swift */; };
 		C8C7A668D40A63D3C0468DB8 /* KeychainManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A17E94226B9C40783BD3FBA /* KeychainManagerTests.swift */; };
+		C901DD54BDECFB8141D0005A /* ConfigWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C383EA3946EA6F4AFC5D362 /* ConfigWriter.swift */; };
 		CF77AA45C5C467A08BEA94FB /* ZencoderSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD9020CD4C27E66E8CBF4A91 /* ZencoderSettingsTab.swift */; };
 		D86B145A2C215BAE0B2FE59C /* ZencoderSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AE950E84863CA7745A9C9D /* ZencoderSettingsManager.swift */; };
 		DDDE17979FCDC53ABDE5C3F5 /* ChatGPTCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98DEB7EC4FB21EAE389C379 /* ChatGPTCatalogTests.swift */; };
 		DF8F1311FAAA0B799E7189C6 /* ChatGPTCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51BA5D536CEBD923F34F2204 /* ChatGPTCatalog.swift */; };
 		E910011DAD51287CF7498AB9 /* ZenflowProjectSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CC367184825253FDF91E45 /* ZenflowProjectSelectionTests.swift */; };
+		EE18CF6BF6138DE1D3B9FD7F /* TOMLEscaper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E905BBE70EB5498029A56A /* TOMLEscaper.swift */; };
 		F37F45BB13B006CAD4D40D3C /* ChatGPTUpstreamMockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AD58130A9A2C5F1207BEE6 /* ChatGPTUpstreamMockTests.swift */; };
 		F3B285279A9E8BC55EE090BA /* RouterStatsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A0D52F9ABAB69F87E0C989 /* RouterStatsTab.swift */; };
 		F5FEF49131B7D1B7563AF898 /* CodexAuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206D7DCDE044E1F23716DD23 /* CodexAuthTests.swift */; };
@@ -101,6 +109,7 @@
 		069A933D58596AE4FD5C2877 /* ModelEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelEditorSheet.swift; sourceTree = "<group>"; };
 		090E9AE44DD95C67478422B8 /* ApiKeyValidatorParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKeyValidatorParsingTests.swift; sourceTree = "<group>"; };
 		16CC367184825253FDF91E45 /* ZenflowProjectSelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowProjectSelectionTests.swift; sourceTree = "<group>"; };
+		1898C124DBE8052F5345188F /* CatalogWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogWriter.swift; sourceTree = "<group>"; };
 		18A92F2FE03DF0A522CC9B69 /* ZenflowRouterSettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowRouterSettingsViewModelTests.swift; sourceTree = "<group>"; };
 		1E72FA82D4FD1543797F9594 /* ApiKeyValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKeyValidatorTests.swift; sourceTree = "<group>"; };
 		1F166ECA1A1503244BC96E48 /* CodexAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexAuth.swift; sourceTree = "<group>"; };
@@ -138,20 +147,25 @@
 		8208C35D2E4501436F3CBF34 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		82214BF7026932AC48F47FD9 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
 		83AE950E84863CA7745A9C9D /* ZencoderSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZencoderSettingsManager.swift; sourceTree = "<group>"; };
+		88D49629B8CB18B929A20347 /* ConfigWriterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigWriterTests.swift; sourceTree = "<group>"; };
+		8B6843B91BB3D4B36EF09869 /* CatalogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogEntry.swift; sourceTree = "<group>"; };
 		917BEBF2B139A77E577082E6 /* WorkflowTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowTemplateTests.swift; sourceTree = "<group>"; };
 		99EA180EBC2E9A8C8057029D /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		9A1D0529392FB1E57C575141 /* ProviderCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderCatalogTests.swift; sourceTree = "<group>"; };
 		9AEE26B025834FF402A53BAA /* RouterStatsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterStatsManagerTests.swift; sourceTree = "<group>"; };
+		9C383EA3946EA6F4AFC5D362 /* ConfigWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigWriter.swift; sourceTree = "<group>"; };
 		9DFF7130CFD81349CA95AE15 /* ZenflowRouterSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowRouterSettingsViewModel.swift; sourceTree = "<group>"; };
 		9E9133133420174DABD45B1C /* ChatCompletionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionModels.swift; sourceTree = "<group>"; };
 		9EBE9A93D367F7A0A136F2A0 /* ZenflowWorkflowEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowWorkflowEditorSheet.swift; sourceTree = "<group>"; };
 		A3A0D52F9ABAB69F87E0C989 /* RouterStatsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouterStatsTab.swift; sourceTree = "<group>"; };
+		A499948E62E41CB7177094ED /* CodexConfigPatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexConfigPatcherTests.swift; sourceTree = "<group>"; };
 		A541027142E2E45F73EDDBDE /* ModelListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelListRow.swift; sourceTree = "<group>"; };
 		A8141DAB812B4F3AB5B09B1B /* ZenflowProjectSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowProjectSelection.swift; sourceTree = "<group>"; };
 		A98686A17BE980653FD23E27 /* ChatCompletionModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCompletionModelsTests.swift; sourceTree = "<group>"; };
 		AA08060C6230F807DAF523DC /* ZenflowRouterSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowRouterSettingsTab.swift; sourceTree = "<group>"; };
 		AECB1D8213B22B0E3A1E9665 /* ShimbarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimbarApp.swift; sourceTree = "<group>"; };
 		B0C1E26AD399C372C5607C69 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		B1C0800C681734374B93391E /* CatalogEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogEntryTests.swift; sourceTree = "<group>"; };
 		B504F00B161268564759F9CE /* ShimStatusIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimStatusIcon.swift; sourceTree = "<group>"; };
 		B82DC915B01B776BB36A273C /* ChatGPTPassthroughProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTPassthroughProbe.swift; sourceTree = "<group>"; };
 		B98DEB7EC4FB21EAE389C379 /* ChatGPTCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTCatalogTests.swift; sourceTree = "<group>"; };
@@ -167,10 +181,12 @@
 		D92E2ABFDDC107F468F9CBB4 /* ApiKeyValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKeyValidator.swift; sourceTree = "<group>"; };
 		D932368BD8501309E54E6B33 /* ProcessRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRunnerTests.swift; sourceTree = "<group>"; };
 		DB4837D4C87633E992ADA5C3 /* ZencoderSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZencoderSettings.swift; sourceTree = "<group>"; };
+		E2E905BBE70EB5498029A56A /* TOMLEscaper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOMLEscaper.swift; sourceTree = "<group>"; };
 		E6BE0E69D2A88920FE689350 /* ShimModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimModelTests.swift; sourceTree = "<group>"; };
 		E97A338A02F5785947731CA0 /* ZencoderSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZencoderSettingsTests.swift; sourceTree = "<group>"; };
 		F0DC24D5CE8C67B86ABCE3F3 /* ChatGPTUpstream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTUpstream.swift; sourceTree = "<group>"; };
 		F0DD77113AD50289EC3E5672 /* ShimManagerClassifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimManagerClassifierTests.swift; sourceTree = "<group>"; };
+		F3BAA3249667321D984403B5 /* CodexConfigPatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexConfigPatcher.swift; sourceTree = "<group>"; };
 		F3D799A5CE60B2DDC4FF3CA7 /* ZenflowWorkflowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenflowWorkflowTests.swift; sourceTree = "<group>"; };
 		FCB795178DED988F5103FA78 /* ShimMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimMenuView.swift; sourceTree = "<group>"; };
 		FD9020CD4C27E66E8CBF4A91 /* ZencoderSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZencoderSettingsTab.swift; sourceTree = "<group>"; };
@@ -180,6 +196,7 @@
 		0DD5AF612BCE9094647F9D22 /* ServerKit */ = {
 			isa = PBXGroup;
 			children = (
+				730AF2709F327F0EFD180304 /* Catalog */,
 				6A9C4C6C2A9B4D05A038F3F0 /* Passthrough */,
 			);
 			path = ServerKit;
@@ -191,10 +208,13 @@
 				090E9AE44DD95C67478422B8 /* ApiKeyValidatorParsingTests.swift */,
 				1E72FA82D4FD1543797F9594 /* ApiKeyValidatorTests.swift */,
 				B9E6541913E1CD7A674D2279 /* AppSettingsTests.swift */,
+				B1C0800C681734374B93391E /* CatalogEntryTests.swift */,
 				A98686A17BE980653FD23E27 /* ChatCompletionModelsTests.swift */,
 				B98DEB7EC4FB21EAE389C379 /* ChatGPTCatalogTests.swift */,
 				51AD58130A9A2C5F1207BEE6 /* ChatGPTUpstreamMockTests.swift */,
 				206D7DCDE044E1F23716DD23 /* CodexAuthTests.swift */,
+				A499948E62E41CB7177094ED /* CodexConfigPatcherTests.swift */,
+				88D49629B8CB18B929A20347 /* ConfigWriterTests.swift */,
 				5418DD3E89C648041133A6C4 /* DebugLoggerTests.swift */,
 				6A17E94226B9C40783BD3FBA /* KeychainManagerTests.swift */,
 				806D0127AF4C8C8742756BEA /* ModelsJsonManagerCRUDTests.swift */,
@@ -270,6 +290,18 @@
 				9EBE9A93D367F7A0A136F2A0 /* ZenflowWorkflowEditorSheet.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		730AF2709F327F0EFD180304 /* Catalog */ = {
+			isa = PBXGroup;
+			children = (
+				8B6843B91BB3D4B36EF09869 /* CatalogEntry.swift */,
+				1898C124DBE8052F5345188F /* CatalogWriter.swift */,
+				F3BAA3249667321D984403B5 /* CodexConfigPatcher.swift */,
+				9C383EA3946EA6F4AFC5D362 /* ConfigWriter.swift */,
+				E2E905BBE70EB5498029A56A /* TOMLEscaper.swift */,
+			);
+			path = Catalog;
 			sourceTree = "<group>";
 		};
 		E4C0D45ACC24076CA3D7DD34 /* Products */ = {
@@ -407,10 +439,13 @@
 				4660CFB3F02AD1F0932505E1 /* ApiKeyValidatorParsingTests.swift in Sources */,
 				FAD463AD2896B15863C85B5A /* ApiKeyValidatorTests.swift in Sources */,
 				423C717497AB2DCD831CCBAA /* AppSettingsTests.swift in Sources */,
+				53B5604E781C5D315C29CF14 /* CatalogEntryTests.swift in Sources */,
 				737B3795BEE3186ACFEA2699 /* ChatCompletionModelsTests.swift in Sources */,
 				DDDE17979FCDC53ABDE5C3F5 /* ChatGPTCatalogTests.swift in Sources */,
 				F37F45BB13B006CAD4D40D3C /* ChatGPTUpstreamMockTests.swift in Sources */,
 				F5FEF49131B7D1B7563AF898 /* CodexAuthTests.swift in Sources */,
+				1C9C0C66419734F9114A1F8B /* CodexConfigPatcherTests.swift in Sources */,
+				420CD0BCAA9B2D75C1D5F352 /* ConfigWriterTests.swift in Sources */,
 				2A5E5E61B1439873C850B885 /* DebugLoggerTests.swift in Sources */,
 				C8C7A668D40A63D3C0468DB8 /* KeychainManagerTests.swift in Sources */,
 				1338E39C87C3815FE628E9BF /* ModelsJsonManagerCRUDTests.swift in Sources */,
@@ -443,11 +478,15 @@
 				4A470A4C71513A51DF83B37B /* ApiKeyValidator.swift in Sources */,
 				58DBF0665BBA51351002A120 /* AppSettings.swift in Sources */,
 				5A3E04203FF4E5C324DA2E37 /* AutoRouterSettingsTab.swift in Sources */,
+				64926F6FF315CB1013323BFF /* CatalogEntry.swift in Sources */,
+				7C9FD274A5549EDC14DDBF93 /* CatalogWriter.swift in Sources */,
 				B5680EC9DBCE5D19975CB2AD /* ChatCompletionModels.swift in Sources */,
 				DF8F1311FAAA0B799E7189C6 /* ChatGPTCatalog.swift in Sources */,
 				70DC72BEBDD4BC8A2A9CA447 /* ChatGPTPassthroughProbe.swift in Sources */,
 				736286C2301495CE57C8A9B9 /* ChatGPTUpstream.swift in Sources */,
 				01579401331F92AF168B33B2 /* CodexAuth.swift in Sources */,
+				6C02F511EC78855B959FDE70 /* CodexConfigPatcher.swift in Sources */,
+				C901DD54BDECFB8141D0005A /* ConfigWriter.swift in Sources */,
 				37571F0AA42D5C9BCBA52FDF /* DebugLogger.swift in Sources */,
 				6610E52BF77D4A99C71DF560 /* GeneralSettingsTab.swift in Sources */,
 				4614916A01CC51D0218CE524 /* KeychainManager.swift in Sources */,
@@ -474,6 +513,7 @@
 				F76D2841A9FA1DCB2371094A /* ShimUpdater.swift in Sources */,
 				B1585733304D2AE013808D8F /* ShimbarApp.swift in Sources */,
 				4285E5473F5ED034B6902FF8 /* StartupValidator.swift in Sources */,
+				EE18CF6BF6138DE1D3B9FD7F /* TOMLEscaper.swift in Sources */,
 				460EFAA7ECBF4E3DB4F5304D /* ZencoderSettings.swift in Sources */,
 				D86B145A2C215BAE0B2FE59C /* ZencoderSettingsManager.swift in Sources */,
 				CF77AA45C5C467A08BEA94FB /* ZencoderSettingsTab.swift in Sources */,
