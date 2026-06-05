@@ -202,7 +202,7 @@ enum CodexConfigPatcher {
 
     static func removeSection(from text: String, section: String) -> String {
         let header = "[\(section)]"
-        var lines = text.components(separatedBy: .newlines)
+        let lines = text.components(separatedBy: .newlines)
         var output: [String] = []
         var skipping = false
         for line in lines {

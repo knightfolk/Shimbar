@@ -429,7 +429,7 @@ final class ZenflowRouterManager {
         }
 
         var reason: RouterDecisionReason = .classified
-        var finalConfidence = parsedConfidence
+        let finalConfidence = parsedConfidence
 
         if selected == nil || finalConfidence < config.threshold {
             if selected == nil {

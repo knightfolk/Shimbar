@@ -32,7 +32,11 @@ final class ShimServer {
     private init() {}
 
     func start() async throws {
-        guard state == .stopped || state == .error("") else { return }
+        if case .error = state {
+            // Allow restarting from any error state
+        } else if state != .stopped {
+            return
+        }
         state = .starting
         snapshot = ShimServerSnapshot(models: [], health: nil, state: .starting)
 

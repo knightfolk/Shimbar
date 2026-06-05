@@ -5,7 +5,11 @@ enum DebugLogger {
 
     static func log(_ message: String) {
         #if DEBUG
-        let logURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("shimbar_debug.log")
+        let logsDir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library")
+            .appendingPathComponent("Logs")
+        try? FileManager.default.createDirectory(at: logsDir, withIntermediateDirectories: true)
+        let logURL = logsDir.appendingPathComponent("shimbar_debug.log")
 
         rotateIfNeeded(logURL)
 

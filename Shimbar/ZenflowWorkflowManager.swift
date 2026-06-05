@@ -65,7 +65,7 @@ final class ZenflowWorkflowManager {
             
             return workflows.sorted(by: { $0.title < $1.title })
         } catch {
-            print("Failed to load workflows: \(error)")
+            DebugLogger.log("Failed to load workflows: \(error)")
             return []
         }
     }

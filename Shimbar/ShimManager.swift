@@ -775,7 +775,18 @@ final class ShimManager {
         lastError = nil
         defer { isLoading = false }
 
-        if NSWorkspace.shared.launchApplication("Codex") {
+        if let codexURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.codex.desktop") ??
+            NSWorkspace.shared.urlForApplication(withBundleIdentifier: "io.codex.desktop") {
+            let config = NSWorkspace.OpenConfiguration()
+            config.activates = true
+            NSWorkspace.shared.openApplication(at: codexURL, configuration: config, completionHandler: nil)
+            return
+        }
+
+        if let foundURL = NSWorkspace.shared.urlsForApplications(withBundleIdentifier: "com.electron.codex").first {
+            let config = NSWorkspace.OpenConfiguration()
+            config.activates = true
+            NSWorkspace.shared.openApplication(at: foundURL, configuration: config, completionHandler: nil)
             return
         }
 
