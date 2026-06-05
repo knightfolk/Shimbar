@@ -188,9 +188,13 @@ struct ShimRequestStat: Identifiable {
     var id: String { "\(timestamp.timeIntervalSince1970)-\(model)" }
     var timestamp: Date
     var model: String
+    var originalModel: String
     var endpoint: String
     var stream: Bool
     var toolCount: Int
+    var wasAutoRouted: Bool
+    var routerReason: String?
+    var routerScore: Double?
 }
 
 // MARK: - ShimModelStatsSummary
@@ -198,6 +202,7 @@ struct ShimRequestStat: Identifiable {
 struct ShimModelStatsSummary: Equatable {
     var totalRequests: Int
     var modelCounts: [String: Int]
+    var autoRoutedModelCounts: [String: Int]
     var autoRouterRequests: Int
     var directModelRequests: Int
     var requestsOverTime: [String: Int]
@@ -212,6 +217,15 @@ struct ShimModelStatsSummary: Equatable {
     }
 }
 
+// MARK: - ShimRoutingDecision
+
+struct ShimRoutingDecision: Equatable {
+    var fromModel: String
+    var toModel: String
+    var reason: String
+    var score: Double?
+}
+
 // MARK: - ShimLogStatsCollector
 
 @Observable
@@ -222,6 +236,7 @@ final class ShimLogStatsCollector {
     private let syncQueue = DispatchQueue(label: "com.shimbar.shim-log-stats")
 
     private var stats: [ShimRequestStat] = []
+    private var routingDecisions: [ShimRoutingDecision] = []
     private var lastParsedOffset: UInt64 = 0
     private var lastParsedFileSize: UInt64 = 0
 
@@ -279,6 +294,7 @@ final class ShimLogStatsCollector {
                 if fileSize < lastParsedFileSize {
                     lastParsedOffset = 0
                     stats.removeAll()
+                    routingDecisions.removeAll()
                 }
 
                 if lastParsedOffset >= fileSize {
@@ -291,13 +307,19 @@ final class ShimLogStatsCollector {
                 try? handle.close()
 
                 let content = String(data: data, encoding: .utf8) ?? ""
-                let newStats = Self.parseRequestLines(content)
+                let (newStats, newDecisions) = Self.parseLogContent(content)
+
+                if !newDecisions.isEmpty {
+                    routingDecisions.append(contentsOf: newDecisions)
+                    if routingDecisions.count > 5000 {
+                        routingDecisions.removeFirst(routingDecisions.count - 5000)
+                    }
+                }
 
                 if !newStats.isEmpty {
                     stats.append(contentsOf: newStats)
-                    let maxStats = 5000
-                    if stats.count > maxStats {
-                        stats.removeFirst(stats.count - maxStats)
+                    if stats.count > 5000 {
+                        stats.removeFirst(stats.count - 5000)
                     }
                 }
 
@@ -316,15 +338,44 @@ final class ShimLogStatsCollector {
         options: []
     )
 
-    private static func parseRequestLines(_ content: String) -> [ShimRequestStat] {
-        var results: [ShimRequestStat] = []
-        let now = Date()
-        let totalCount = content.components(separatedBy: "[req]").count - 1
-        let intervalPerLine: Double = totalCount > 1 ? 1.0 / Double(totalCount) : 0
+    private static let routerDetailedPattern = try! NSRegularExpression(
+        pattern: #"^\[router\]\s+\S+\s+->\s+(\S+)\s+\(score=([0-9.]+).*\)"#,
+        options: []
+    )
 
-        var index = 0
-        for line in content.components(separatedBy: .newlines) {
+    private static let routerSimplePattern = try! NSRegularExpression(
+        pattern: #"^\[router\]\s+(\S+)\s+->\s+(\S+)\s*$"#,
+        options: []
+    )
+
+    private static let routerCachedPattern = try! NSRegularExpression(
+        pattern: #"^\[router\]\s+cache-hit\s+->\s+(\S+)"#,
+        options: []
+    )
+
+    private static func parseLogContent(_ content: String) -> ([ShimRequestStat], [ShimRoutingDecision]) {
+        var stats: [ShimRequestStat] = []
+        var decisions: [ShimRoutingDecision] = []
+
+        let now = Date()
+        let lines = content.components(separatedBy: .newlines)
+
+        var pendingDecision: ShimRoutingDecision?
+        let totalReqLines = lines.filter { $0.trimmingCharacters(in: .whitespaces).hasPrefix("[req]") }.count
+        let intervalPerLine: Double = totalReqLines > 1 ? 1.0 / Double(totalReqLines) : 0
+        var reqIndex = 0
+
+        for line in lines {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
+
+            if trimmed.hasPrefix("[router]") {
+                if let decision = parseRouterLine(trimmed) {
+                    decisions.append(decision)
+                    pendingDecision = decision
+                }
+                continue
+            }
+
             guard trimmed.hasPrefix("[req]") else { continue }
 
             let range = NSRange(trimmed.startIndex..., in: trimmed)
@@ -343,18 +394,63 @@ final class ShimLogStatsCollector {
                 toolCount = 0
             }
 
-            let estimatedTimestamp = now.addingTimeInterval(-Double(totalCount - index) * intervalPerLine)
+            let estimatedTimestamp = now.addingTimeInterval(-Double(totalReqLines - reqIndex) * intervalPerLine)
 
-            results.append(ShimRequestStat(
+            let wasAutoRouted = pendingDecision != nil
+            let routerReason = wasAutoRouted ? pendingDecision!.reason : nil
+            let routerScore = wasAutoRouted ? pendingDecision!.score : nil
+            let originalModel = wasAutoRouted ? "codex-auto" : model
+
+            stats.append(ShimRequestStat(
                 timestamp: estimatedTimestamp,
                 model: model,
+                originalModel: originalModel,
                 endpoint: endpoint,
                 stream: streamStr == "True",
-                toolCount: toolCount
+                toolCount: toolCount,
+                wasAutoRouted: wasAutoRouted,
+                routerReason: routerReason,
+                routerScore: routerScore
             ))
-            index += 1
+            pendingDecision = nil
+            reqIndex += 1
         }
-        return results
+
+        return (stats, decisions)
+    }
+
+    private static func parseRouterLine(_ line: String) -> ShimRoutingDecision? {
+        let range = NSRange(line.startIndex..., in: line)
+
+        if let match = routerDetailedPattern.firstMatch(in: line, range: range) {
+            let toModel = String(line[Range(match.range(at: 1), in: line)!])
+            let scoreStr = String(line[Range(match.range(at: 2), in: line)!])
+            let score = Double(scoreStr) ?? 0
+            var reason = "classified"
+            if line.contains("cache-hit") {
+                reason = "cache_hit"
+            } else if line.contains("below bar") {
+                reason = "low_confidence"
+            } else if line.contains("no classifier") {
+                reason = "no_classifier"
+            } else if line.contains("classifier") {
+                reason = "classifier_error"
+            }
+            return ShimRoutingDecision(fromModel: "codex-auto", toModel: toModel, reason: reason, score: score)
+        }
+
+        if let match = routerCachedPattern.firstMatch(in: line, range: range) {
+            let toModel = String(line[Range(match.range(at: 1), in: line)!])
+            return ShimRoutingDecision(fromModel: "codex-auto", toModel: toModel, reason: "cache_hit", score: nil)
+        }
+
+        if let match = routerSimplePattern.firstMatch(in: line, range: range) {
+            let fromModel = String(line[Range(match.range(at: 1), in: line)!])
+            let toModel = String(line[Range(match.range(at: 2), in: line)!])
+            return ShimRoutingDecision(fromModel: fromModel, toModel: toModel, reason: "classified", score: nil)
+        }
+
+        return nil
     }
 
     func getSummary() -> ShimModelStatsSummary {
@@ -364,6 +460,7 @@ final class ShimLogStatsCollector {
                 return ShimModelStatsSummary(
                     totalRequests: 0,
                     modelCounts: [:],
+                    autoRoutedModelCounts: [:],
                     autoRouterRequests: 0,
                     directModelRequests: 0,
                     requestsOverTime: [:]
@@ -371,13 +468,15 @@ final class ShimLogStatsCollector {
             }
 
             var counts: [String: Int] = [:]
+            var autoRoutedCounts: [String: Int] = [:]
             var autoRouterCount = 0
             var directCount = 0
 
             for stat in stats {
                 counts[stat.model, default: 0] += 1
-                if stat.model.hasPrefix("codex-auto") {
+                if stat.wasAutoRouted {
                     autoRouterCount += 1
+                    autoRoutedCounts[stat.model, default: 0] += 1
                 } else {
                     directCount += 1
                 }
@@ -394,6 +493,7 @@ final class ShimLogStatsCollector {
             return ShimModelStatsSummary(
                 totalRequests: total,
                 modelCounts: counts,
+                autoRoutedModelCounts: autoRoutedCounts,
                 autoRouterRequests: autoRouterCount,
                 directModelRequests: directCount,
                 requestsOverTime: hourlyCounts
@@ -420,6 +520,7 @@ final class ShimLogStatsCollector {
     func clearStats() {
         syncQueue.sync {
             stats.removeAll()
+            routingDecisions.removeAll()
             lastParsedOffset = 0
             lastParsedFileSize = 0
             try? fileManager.removeItem(at: stateURL)

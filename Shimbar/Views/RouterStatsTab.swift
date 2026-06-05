@@ -148,11 +148,11 @@ struct RouterStatsTab: View {
                         .lineLimit(1)
                         .frame(minWidth: 150, alignment: .leading)
                         .help(model)
-                        .foregroundStyle(model.hasPrefix("codex-auto") ? Color.accentColor : .primary)
+                        .foregroundStyle(logSummary.autoRoutedModelCounts[model] != nil ? Color.accentColor : .primary)
 
                     GeometryReader { geo in
                         RoundedRectangle(cornerRadius: 3)
-                            .fill(model.hasPrefix("codex-auto") ? Color.accentColor.opacity(0.5) : Color.blue.opacity(0.5))
+                            .fill(logSummary.autoRoutedModelCounts[model] != nil ? Color.accentColor.opacity(0.5) : Color.blue.opacity(0.5))
                             .frame(width: max(geo.size.width * CGFloat(count) / CGFloat(maxCount), 2))
                     }
                     .frame(height: 16)
@@ -167,6 +167,12 @@ struct RouterStatsTab: View {
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                         .frame(width: 35, alignment: .trailing)
+
+                    if let routed = logSummary.autoRoutedModelCounts[model] {
+                        Text("(\(routed) routed)")
+                            .font(.caption2)
+                            .foregroundStyle(.quaternary)
+                    }
                 }
             }
         }
