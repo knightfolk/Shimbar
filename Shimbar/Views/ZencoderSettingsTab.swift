@@ -7,7 +7,7 @@ struct ZencoderSettingsTab: View {
     
     @State private var selectedSegment = 0
     
-    @State private var selectedProjectPath: String?
+    @State private var projectSelection = ZenflowProjectSelection.shared
     @State private var workflows: [ZenflowWorkflow] = []
     @State private var editingWorkflow: ZenflowWorkflow?
     @State private var isCreatingWorkflow = false
@@ -57,7 +57,7 @@ struct ZencoderSettingsTab: View {
             )
         }
         .sheet(isPresented: $isCreatingWorkflow) {
-            if let path = selectedProjectPath {
+            if let path = projectSelection.selectedPath {
                 ZenflowWorkflowEditorSheet(
                     workflow: ZenflowWorkflow(
                         fileName: "new-workflow.md",
@@ -120,10 +120,10 @@ struct ZencoderSettingsTab: View {
             }
         }
         .onAppear {
-            if selectedProjectPath == nil {
-                selectedProjectPath = workflowManager.recentProjects.first
+            if projectSelection.selectedPath == nil {
+                projectSelection.selectedPath = workflowManager.recentProjects.first
             }
-            if selectedProjectPath != nil {
+            if projectSelection.selectedPath != nil {
                 refreshWorkflows()
             }
         }
@@ -278,7 +278,7 @@ struct ZencoderSettingsTab: View {
                 Text("Project:")
                     .fontWeight(.medium)
                 
-                if let path = selectedProjectPath {
+                if let path = projectSelection.selectedPath {
                     Text((path as NSString).lastPathComponent)
                         .help(path)
                 } else {
@@ -296,7 +296,7 @@ struct ZencoderSettingsTab: View {
                         Text("Recent Projects")
                         ForEach(workflowManager.recentProjects, id: \.self) { path in
                             Button((path as NSString).lastPathComponent) {
-                                selectedProjectPath = path
+                                projectSelection.selectedPath = path
                                 refreshWorkflows()
                             }
                             .help(path)
@@ -327,7 +327,7 @@ struct ZencoderSettingsTab: View {
             
             Divider()
             
-            if selectedProjectPath == nil {
+            if projectSelection.selectedPath == nil {
                 ContentUnavailableView(
                     "No Project Selected",
                     systemImage: "folder.badge.questionmark",
@@ -406,7 +406,7 @@ struct ZencoderSettingsTab: View {
                     
                     Spacer()
                     
-                    Text((selectedProjectPath ?? "").appending("/.zenflow/workflows/"))
+                    Text((projectSelection.selectedPath ?? "").appending("/.zenflow/workflows/"))
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
@@ -422,7 +422,7 @@ struct ZencoderSettingsTab: View {
             switch result {
             case .success(let urls):
                 if let url = urls.first {
-                    selectedProjectPath = url.path
+                    projectSelection.selectedPath = url.path
                     workflowManager.addRecentProject(url.path)
                     refreshWorkflows()
                 }
@@ -434,12 +434,12 @@ struct ZencoderSettingsTab: View {
     }
     
     private func refreshWorkflows() {
-        guard let path = selectedProjectPath else { return }
+        guard let path = projectSelection.selectedPath else { return }
         workflows = workflowManager.loadWorkflows(from: path)
     }
     
     private func createFromTemplate(_ template: WorkflowTemplate) {
-        guard let path = selectedProjectPath else { return }
+        guard let path = projectSelection.selectedPath else { return }
         let workflow = ZenflowWorkflow(
             fileName: template.defaultFileName,
             title: template.title,

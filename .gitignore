@@ -22,6 +22,8 @@ DerivedData/
 
 # Zenflow
 .zenflow-attachments/
+.zenflow/
+agents.md
 
 # Secrets
 .env

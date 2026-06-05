@@ -29,6 +29,7 @@ struct SettingsView: View {
                     }
                 
                 ZencoderSettingsTab()
+                    .environment(manager)
                     .tabItem {
                         Label("Zencoder", systemImage: "wand.and.stars")
                     }
@@ -37,6 +38,17 @@ struct SettingsView: View {
                     .environment(manager)
                     .tabItem {
                         Label("Auto Router", systemImage: "arrow.triangle.branch")
+                    }
+                
+                ZenflowRouterSettingsTab()
+                    .environment(manager)
+                    .tabItem {
+                        Label("Zenflow Router", systemImage: "signpost.right.and.left")
+                    }
+                
+                RouterStatsTab()
+                    .tabItem {
+                        Label("Router Stats", systemImage: "chart.bar")
                     }
                 
                 AdvancedSettingsTab()

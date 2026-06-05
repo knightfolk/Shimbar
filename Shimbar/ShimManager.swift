@@ -1069,4 +1069,24 @@ final class ShimManager {
 
     // MARK: - Private Helpers
 
+    /// Convenience method that runs the full Zenflow auto router flow:
+    /// routes the task using the classifier if available, falling back to default.
+    func routeZenflowTask(
+        taskTitle: String,
+        taskDescription: String,
+        projectPath: String
+    ) async -> String {
+        let classifierAvailable = status == .running && autoRouterEnabled
+
+        return await ZenflowRouterManager.shared.routeFully(
+            taskTitle: taskTitle,
+            taskDescription: taskDescription,
+            projectPath: projectPath,
+            classifierAvailable: classifierAvailable,
+            callClassifier: { model, prompt in
+                await self.callClassifier(prompt: prompt, model: model)
+            }
+        )
+    }
+
 }
