@@ -1,9 +1,14 @@
 import Foundation
+import os.log
 
 enum DebugLogger {
     static let maxLogSize: UInt64 = 1_048_576
 
+    private static let logger = Logger(subsystem: "com.shimbar.app", category: "debug")
+
     static func log(_ message: String) {
+        logger.info("\(message, privacy: .public)")
+
         #if DEBUG
         let logsDir = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library")
