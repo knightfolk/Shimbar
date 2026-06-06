@@ -2,7 +2,11 @@
 
 A native macOS menu bar utility for the `codex-shim` local proxy daemon. **Shimbar** provides a clean, visual interface directly in your Apple menu bar to control the local proxy server, configure model providers, switch active coding models in real-time, and patch Codex Desktop.
 
-[![Download Shimbar](https://img.shields.io/badge/Download-Latest_Release-indigo.svg?style=for-the-badge&logo=apple)](https://github.com/knightfolk/Shimbar/releases)
+[![Download Shimbar](https://img.shields.io/badge/Download-v1.0.1-0052CC.svg?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/knightfolk/Shimbar/releases/latest/download/Shimbar-1.0.1.dmg)
+[![macOS 14.0+](https://img.shields.io/badge/macOS-14.0%2B-000000?style=flat-square&logo=apple&logoColor=white)](https://www.apple.com/macos)
+[![Swift 5.10](https://img.shields.io/badge/Swift-5.10-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![CI](https://github.com/knightfolk/Shimbar/actions/workflows/build.yml/badge.svg)](https://github.com/knightfolk/Shimbar/actions/workflows/build.yml)
 
 ---
 
@@ -39,12 +43,38 @@ A native macOS menu bar utility for the `codex-shim` local proxy daemon. **Shimb
 
 ---
 
-## Requirements & Tech Stack
+## System Requirements
 
-- **macOS Sonoma (14.0+)** or later.
-- **Xcode 16.0+** with Swift 5.10.
-- **XcodeGen** (utility to generate the `.xcodeproj` file from `project.yml`).
-- **codex-shim** CLI binary.
+| Requirement | Minimum | Recommended |
+|-------------|---------|-------------|
+| **macOS** | Sonoma 14.0 | Sequoia 15.0+ |
+| **Architecture** | Apple Silicon (M1+) | Apple Silicon (M1+) |
+| **Intel** | Supported | — |
+| **Xcode** | 16.0 | 16.4+ |
+| **Swift** | 5.10 | 6.0+ |
+| **RAM** | 8 GB | 16 GB+ |
+
+### Runtime Dependencies
+
+- **`codex-shim`** CLI binary — the local proxy daemon that Shimbar manages. Install separately via `codex-shim install`.
+
+### Build Dependencies
+
+- **XcodeGen** — generates the `.xcodeproj` from `project.yml`:
+  ```bash
+  brew install xcodegen
+  ```
+- **Make** — build orchestration (macOS built-in)
+
+### Tech Stack
+
+- **Language**: Swift 5.10 (Swift 6.0 ready)
+- **UI Framework**: SwiftUI with `@Observable` (no Combine dependency)
+- **Architecture**: Singleton managers + SwiftUI views, actor-based concurrency
+- **Networking**: Native `URLSession` (zero third-party HTTP dependencies)
+- **Security**: macOS Keychain Services, Hardened Runtime, Notarized distribution
+- **Testing**: XCTest / Swift Testing — 331 tests, 0 failures
+- **CI**: GitHub Actions (macOS 15 runner, full build + test suite)
 
 ---
 
@@ -52,11 +82,13 @@ A native macOS menu bar utility for the `codex-shim` local proxy daemon. **Shimb
 
 ### Quick Install (Recommended)
 
-1. Go to the [Releases](https://github.com/knightfolk/Shimbar/releases) section on GitHub.
-2. Download the latest **`Shimbar-Beta.dmg`** package.
-3. Mount the DMG and drag **Shimbar** to your **Applications** folder to install.
+1. Download the latest **`Shimbar-1.0.1.dmg`** from [**Releases**](https://github.com/knightfolk/Shimbar/releases/latest).
+2. Mount the DMG and drag **Shimbar** to your **Applications** folder.
+3. On first launch, right-click the app and choose **Open** (required once for Gatekeeper).
 
-> **Note:** Shimbar runs the `codex-shim` CLI binary natively and does not require Python. If you previously used `codex-shim install`, you can install without Python by running `codex-shim install --install-without-python`.
+> The DMG is **signed** with a Developer ID and **notarized** by Apple. After the first launch, it will open normally.
+
+> **Note:** Shimbar requires the `codex-shim` CLI binary. Install it with `codex-shim install`. If you previously used the Python-based shim, run `codex-shim install --install-without-python`.
 
 ### Building from Source
 
@@ -149,7 +181,10 @@ Returns the OpenAI-compatible model list reflecting what the shim currently serv
 
 ## Security
 
-All credentials are saved securely using native macOS **Keychain Services** for robust local backup. In addition, credentials are saved in the local `~/.codex-shim/models.json` file so that the background `codex-shim` proxy daemon can read them to authenticate requests with upstream LLM providers. Please keep your `models.json` file private as it contains these credentials in plaintext.
+- **Code-signed** with a Developer ID Application certificate and **notarized** through Apple's notary service — no Gatekeeper warnings on launch.
+- **Hardened Runtime** enabled with entitlements for library validation.
+- All API credentials are stored in the native macOS **Keychain** — never written to disk in plaintext by Shimbar.
+- Credentials are also saved in `~/.codex-shim/models.json` so the background `codex-shim` proxy daemon can authenticate with upstream LLM providers. **Keep this file private.**
 
 ---
 
